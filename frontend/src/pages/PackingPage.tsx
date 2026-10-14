@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { PackageCheck, RefreshCw, Box, Printer, Check, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import {
+  PackageCheck,
+  RefreshCw,
+  Box,
+  Printer,
+  Check,
+  ArrowRight,
+  Truck,
+  Layers,
+  ChevronRight,
+  ClipboardList,
+} from 'lucide-react';
 import { useWarehouse } from '../context/WarehouseContext.js';
 import { api } from '../services/api.js';
 import { SalesOrder } from '../types/index.js';
@@ -7,9 +19,11 @@ import { Button } from '../components/common/Button.js';
 import { Badge } from '../components/common/Badge.js';
 import { Modal } from '../components/common/Modal.js';
 import { EmptyState } from '../components/common/EmptyState.js';
+import { formatNumberIN, formatIST } from '../utils/formatters.js';
 import { toast } from 'sonner';
 
 export const PackingPage: React.FC = () => {
+  const navigate = useNavigate();
   const { selectedWarehouseId } = useWarehouse();
   const [orders, setOrders] = useState<SalesOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,104 +74,160 @@ export const PackingPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-4 max-w-7xl mx-auto">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-bold text-surface-900 tracking-tight">
-            Order Packing Station
-          </h1>
-          <p className="text-xs text-surface-500">
-            Package verification, container assignment, and packing slip generation
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold text-slate-900 tracking-tight">
+              Order Packing Station
+            </h1>
+            <span className="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              {orders.length} Ready to Pack
+            </span>
+          </div>
+          <p className="text-xs text-slate-600 mt-0.5">
+            Physical package verification, container tare assignment, and packing slip generation
           </p>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadOrders}
-          leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadOrders}
+            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/shipments')}
+            rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
+          >
+            Go to Dispatch Station
+          </Button>
+        </div>
+      </div>
+
+      {/* Outward Guided Stages Pipeline Bar */}
+      <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono">
+        <button
+          type="button"
+          onClick={() => navigate('/picking')}
+          className="flex items-center gap-2 p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors text-left"
         >
-          Refresh
-        </Button>
+          <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">
+            1
+          </div>
+          <span className="truncate">Stage 1: Floor Picking</span>
+        </button>
+
+        <div className="flex items-center gap-2 p-2 rounded-md bg-white border border-slate-300 text-slate-900 font-bold shadow-xs">
+          <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+            2
+          </div>
+          <span className="truncate">Stage 2: Carton Packing (Active)</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate('/shipments')}
+          className="flex items-center gap-2 p-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-colors text-left"
+        >
+          <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px]">
+            3
+          </div>
+          <span className="truncate">Stage 3: Carrier Dispatch</span>
+        </button>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white border border-surface-200 rounded-lg overflow-hidden shadow-sm">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-surface-50 border-b border-surface-200 text-surface-500 uppercase tracking-wider font-mono text-[10px]">
-            <tr>
-              <th className="px-4 py-2.5">Order #</th>
-              <th className="px-4 py-2.5">Customer</th>
-              <th className="px-4 py-2.5">Items to Verify</th>
-              <th className="px-4 py-2.5 text-right">Picked Units</th>
-              <th className="px-4 py-2.5">Carrier Service</th>
-              <th className="px-4 py-2.5 text-center">Packing Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-100">
-            {isLoading ? (
+      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-mono text-[10px]">
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-surface-400">
-                  Loading orders awaiting packing...
-                </td>
+                <th className="px-4 py-2.5">Order #</th>
+                <th className="px-4 py-2.5">Customer & City</th>
+                <th className="px-4 py-2.5">Verified Picked Items</th>
+                <th className="px-4 py-2.5 text-right">Total Units</th>
+                <th className="px-4 py-2.5">Assigned Carrier</th>
+                <th className="px-4 py-2.5 text-center">Packing Actions</th>
               </tr>
-            ) : orders.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="p-8">
-                  <EmptyState
-                    icon={PackageCheck}
-                    title="No Orders Awaiting Packing"
-                    description="All picked orders have been containerized and sent to shipping dispatch."
-                  />
-                </td>
-              </tr>
-            ) : (
-              orders.map((ord) => {
-                const totalUnits = ord.items.reduce((s, i) => s + (i.pickedQty || i.allocatedQty), 0);
-                return (
-                  <tr key={ord.id} className="hover:bg-surface-50/70 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-surface-900">
-                      {ord.orderNumber}
-                    </td>
-                    <td className="px-4 py-3 font-medium text-surface-800">
-                      {ord.customer?.name}
-                    </td>
-                    <td className="px-4 py-3 text-surface-600">
-                      {ord.items.map((i) => `${i.product.sku} (x${i.requestedQty})`).join(', ')}
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono font-bold text-surface-900">
-                      {totalUnits}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-surface-600 text-[11px]">
-                      {ord.shippingCarrier || 'Standard Ground'}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSlipOrder(ord)}
-                          leftIcon={<Printer className="w-3.5 h-3.5" />}
-                        >
-                          Manifest
-                        </Button>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => setSelectedOrder(ord)}
-                          rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                        >
-                          Pack Order
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-sans">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-slate-400">
+                    Loading orders awaiting packing...
+                  </td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center">
+                    <EmptyState
+                      icon={PackageCheck}
+                      title="No Orders Awaiting Packing"
+                      description="All floor-picked items have been packed into shipping cartons. Check floor picking queue for new tasks."
+                      action={{
+                        label: 'Go to Floor Picking Queue',
+                        onClick: () => navigate('/picking'),
+                      }}
+                    />
+                  </td>
+                </tr>
+              ) : (
+                orders.map((ord) => {
+                  const totalUnits = ord.items.reduce((s, i) => s + (i.pickedQty || i.allocatedQty), 0);
+                  return (
+                    <tr key={ord.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-4 py-3 font-mono font-bold text-slate-900">
+                        {ord.orderNumber}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-slate-900">{ord.customer?.name}</div>
+                        <div className="text-[10px] text-slate-500">{ord.customer?.city || 'Warehouse Direct'}</div>
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 font-mono text-[11px]">
+                        {ord.items.map((i) => `${i.product.sku} (x${i.pickedQty || i.requestedQty})`).join(', ')}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono font-bold text-slate-900 tabular-nums">
+                        {formatNumberIN(totalUnits)}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-slate-600 text-[11px]">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
+                          {ord.shippingCarrier || 'Delhivery / Fleet'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSlipOrder(ord)}
+                            leftIcon={<Printer className="w-3.5 h-3.5" />}
+                          >
+                            Manifest
+                          </Button>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => setSelectedOrder(ord)}
+                            rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                          >
+                            Pack Order
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Pack Order Modal */}
@@ -168,59 +238,57 @@ export const PackingPage: React.FC = () => {
         description="Record physical packaging dimensions and container specifications"
       >
         {selectedOrder && (
-          <form onSubmit={handlePackSubmit} className="space-y-4">
-            <div className="p-3 rounded bg-surface-50 border border-surface-200 text-xs font-mono space-y-1">
-              <div>
-                <span className="text-surface-400">Order:</span>{' '}
-                <span className="font-bold text-surface-900">{selectedOrder.orderNumber}</span>
+          <form onSubmit={handlePackSubmit} className="space-y-4 text-xs">
+            <div className="p-3.5 rounded-lg bg-blue-50 border border-blue-200 text-xs font-mono space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-blue-700 font-bold uppercase text-[10px]">Order Reference</span>
+                <span className="font-bold text-blue-950 text-sm">{selectedOrder.orderNumber}</span>
               </div>
-              <div>
-                <span className="text-surface-400">Customer:</span>{' '}
-                <span>{selectedOrder.customer.name}</span>
+              <div className="text-blue-900 text-[11px]">
+                Customer: <strong>{selectedOrder.customer.name}</strong>
               </div>
-              <div>
-                <span className="text-surface-400">Destination:</span>{' '}
-                <span>{selectedOrder.customer.shippingAddress}, {selectedOrder.customer.city}</span>
+              <div className="text-blue-900 text-[11px]">
+                Ship to: <strong>{selectedOrder.customer.shippingAddress}, {selectedOrder.customer.city}</strong>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-surface-700 uppercase mb-1">
-                Container / Box Type
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                Container / Carton Specification *
               </label>
               <select
                 value={boxType}
                 onChange={(e) => setBoxType(e.target.value)}
-                className="w-full h-9 px-3 text-xs bg-white border border-surface-300 rounded font-mono text-surface-900 focus:ring-2 focus:ring-brand-500"
+                className="w-full h-9 px-3 text-xs bg-white border border-slate-300 rounded font-mono text-slate-900 focus:ring-1 focus:ring-blue-500"
               >
-                <option value="STANDARD_CORRUGATED">Standard Corrugated 12x10x8</option>
-                <option value="LARGE_CORRUGATED">Large Corrugated 18x14x12</option>
-                <option value="HEAVY_DUTY_CRATE">Heavy-Duty Double-Wall Crate</option>
-                <option value="PADDED_POLY_MAILER">Padded Poly Mailer</option>
+                <option value="STANDARD_CORRUGATED">Standard 3-Ply Corrugated Box (12×10×8 in)</option>
+                <option value="LARGE_CORRUGATED">Large 5-Ply Corrugated Box (18×14×12 in)</option>
+                <option value="HEAVY_DUTY_CRATE">Heavy-Duty Wooden/Plastic Crate</option>
+                <option value="PADDED_POLY_MAILER">Tamper-Evident Poly Courier Bag</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-surface-700 uppercase mb-1">
-                Gross Weight (kg)
+              <label className="block text-xs font-semibold text-slate-700 uppercase mb-1">
+                Gross Package Weight (kg) *
               </label>
               <input
                 type="number"
-                step="0.1"
-                min={0.1}
+                step="0.05"
+                min={0.05}
                 required
                 value={weightKg}
                 onChange={(e) => setWeightKg(parseFloat(e.target.value) || 1.0)}
-                className="w-full h-9 px-3 text-xs border border-surface-300 rounded font-mono text-surface-900"
+                className="w-full h-9 px-3 text-xs border border-slate-300 rounded font-mono font-bold text-slate-900 bg-white"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-surface-200">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
               <Button type="button" variant="outline" size="sm" onClick={() => setSelectedOrder(null)}>
                 Cancel
               </Button>
               <Button type="submit" variant="primary" size="sm" isLoading={isSubmitting}>
-                Seal & Mark Packed
+                Seal Carton & Stage for Dispatch
               </Button>
             </div>
           </form>
@@ -231,32 +299,45 @@ export const PackingPage: React.FC = () => {
       <Modal
         isOpen={Boolean(slipOrder)}
         onClose={() => setSlipOrder(null)}
-        title="Packing Manifest Slip"
+        title="Packing Slip & Manifest"
         description="Physical manifest copy for warehouse staging and carton insertion"
       >
         {slipOrder && (
           <div className="space-y-4 font-mono text-xs">
-            <div className="p-4 border border-surface-300 rounded bg-surface-50 space-y-2">
-              <div className="flex justify-between border-b pb-2">
-                <span className="font-bold">StockPilot WMS Manifest</span>
-                <span>{slipOrder.orderNumber}</span>
+            <div className="p-4 border border-slate-300 rounded-lg bg-slate-50 space-y-3">
+              <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                <div>
+                  <div className="font-bold text-sm text-slate-900">StockPilot WMS • India</div>
+                  <div className="text-[10px] text-slate-500">Warehouse Packing Slip</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-bold text-slate-900">{slipOrder.orderNumber}</div>
+                  <div className="text-[10px] text-slate-500">{formatIST(slipOrder.orderDate, false)}</div>
+                </div>
               </div>
-              <div>Customer: {slipOrder.customer.name}</div>
-              <div>Address: {slipOrder.customer.shippingAddress}, {slipOrder.customer.city}</div>
-              <div className="border-t pt-2 space-y-1">
-                <div className="font-bold">Verified Items:</div>
+
+              <div className="text-[11px] space-y-0.5">
+                <div>Consignee: <strong>{slipOrder.customer.name}</strong></div>
+                <div>Destination: <strong>{slipOrder.customer.shippingAddress}, {slipOrder.customer.city}</strong></div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-2 space-y-1.5">
+                <div className="font-bold text-[10px] uppercase text-slate-600">Verified Line Items:</div>
                 {slipOrder.items.map((i) => (
-                  <div key={i.id} className="flex justify-between">
-                    <span>{i.product.sku} ({i.product.name})</span>
-                    <span>x{i.requestedQty}</span>
+                  <div key={i.id} className="flex justify-between items-center text-[11px] py-1 border-b border-slate-100">
+                    <div>
+                      <span className="font-bold text-slate-900">{i.product.sku}</span>
+                      <span className="text-slate-500 ml-1.5">— {i.product.name}</span>
+                    </div>
+                    <span className="font-bold text-slate-900">Qty: {i.pickedQty || i.requestedQty} {i.product.uom}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <Button variant="outline" size="sm" onClick={() => setSlipOrder(null)}>
-                Close Manifest
+                Close
               </Button>
             </div>
           </div>
