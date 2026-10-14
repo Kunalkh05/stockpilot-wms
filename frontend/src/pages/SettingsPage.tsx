@@ -6,6 +6,7 @@ import { Role } from '../types/index.js';
 import { Button } from '../components/common/Button.js';
 import { Badge } from '../components/common/Badge.js';
 import { toast } from 'sonner';
+import { formatIST } from '../utils/formatters.js';
 
 export const SettingsPage: React.FC = () => {
   const { warehouses, selectedWarehouse } = useWarehouse();
@@ -112,9 +113,9 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             <div className="p-3 bg-surface-50 rounded border border-surface-200">
-              <span className="text-[10px] text-surface-400 font-mono uppercase block">System Clock</span>
+              <span className="text-[10px] text-surface-400 font-mono uppercase block">System Clock (IST)</span>
               <span className="font-mono text-[11px] text-surface-600 truncate mt-0.5 block">
-                {new Date(health.timestamp).toLocaleTimeString()}
+                {formatIST(health.timestamp)}
               </span>
             </div>
           </div>
