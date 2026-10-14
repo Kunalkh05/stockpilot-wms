@@ -337,7 +337,7 @@ export const SalesOrdersPage: React.FC = () => {
   return (
     <div className="space-y-4 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-2 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold text-slate-900 tracking-tight">Outbound Fulfillment Orders</h1>
@@ -350,7 +350,7 @@ export const SalesOrdersPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <Button variant="outline" size="sm" onClick={loadOrders} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
             Refresh
           </Button>
