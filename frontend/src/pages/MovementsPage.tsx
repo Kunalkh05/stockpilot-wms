@@ -5,6 +5,7 @@ import { StockMovement, MovementType } from '../types/index.js';
 import { Button } from '../components/common/Button.js';
 import { SearchInput } from '../components/common/SearchInput.js';
 import { Badge } from '../components/common/Badge.js';
+import { formatIST, formatNumberIN } from '../utils/formatters.js';
 import { toast } from 'sonner';
 
 export const MovementsPage: React.FC = () => {
