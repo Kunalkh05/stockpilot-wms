@@ -82,7 +82,7 @@ export const DashboardPage: React.FC = () => {
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-1 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold text-slate-900 tracking-tight">Today at the Warehouse</h1>
@@ -95,7 +95,7 @@ export const DashboardPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <Button
             variant="outline"
             size="sm"
