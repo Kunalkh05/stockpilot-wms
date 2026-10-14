@@ -172,7 +172,7 @@ export const UsersPage: React.FC = () => {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. John Doe"
+              placeholder="e.g. Rajesh Kumar"
               className="w-full h-8 px-2 text-xs border border-surface-300 rounded"
             />
           </div>
