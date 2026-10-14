@@ -1,18 +1,18 @@
 # StockPilot WMS — Implementation Status
 
 **Status Date**: 2026-10-14  
-**Current Phase**: Autonomous Quality Gate Round 3 of 8 — System Verified & Feature-Complete
+**Current Phase**: Premium UI/UX Verification and Repair Round 2 of 4 — Indian Warehouse Operations Verified
 
 ---
 
 ## 1. Executive Summary
-StockPilot WMS is substantially implemented, rigorously verified, and feature-complete across all required functional modules and architectural layers. The monorepo unites an Express REST API backed by PostgreSQL 14+ via Prisma ORM with a responsive React 19 + TypeScript + Vite + Tailwind CSS enterprise frontend. 
+StockPilot WMS has been comprehensively refined and verified as a polished, credible, premium B2B warehouse operations tool for Indian e-commerce fulfillment centers, 3PL distributors, FMCG warehouses, and wholesalers in accordance with `prompts/INDIA-WMS-PREMIUM-UX.md`.
 
-In **Round 3**, the system was hardened with end-to-end management for Suppliers, Customers, and Stock Reservations:
-1. **Supplier Directory & Procurement Integration**: Added `GET /api/v1/inbound/suppliers` and `POST /api/v1/inbound/suppliers` with unique code enforcement and Zod validation. Built an interactive "Approved Suppliers" directory tab on `PurchaseOrdersPage.tsx` with contact inspection, search, and a "Register Approved Supplier" modal.
-2. **Customer Directory & Order Integration**: Added `GET /api/v1/outbound/customers` and `POST /api/v1/outbound/customers` with Zod validation. Built an interactive "Customer Accounts" directory tab on `SalesOrdersPage.tsx` with contact cards, address verification, and a "Register Customer Account" modal.
-3. **Stock Reservations Ledger**: Added `GET /api/v1/outbound/reservations` endpoint and built the "Stock Reservations" ledger tab on `SalesOrdersPage.tsx` allowing operators to audit active, consumed, and released inventory reservations with order number, product SKU, bin location, and lot tracking.
-4. **Automated Test Expansion (26 / 26 Passing Tests)**: Expanded the integration test suite in `backend/tests/api.test.ts` to cover vendor registration, customer registration, supplier and customer lookups, and reservations ledger retrieval. All 26 tests pass in ~720ms.
+In **Round 2/4**, visual hierarchy, responsive layout composition across desktop (1440px), tablet (768px), and mobile (390px), and core operational workflows were verified and repaired through live headless Chrome CDP automation:
+1. **Inward Receiving Open PO Discovery**: Fixed `InboundService.listPurchaseOrders` to support comma-separated multi-status filtering (`ORDERED,PARTIALLY_RECEIVED`) and updated `ReceivingPage.tsx`. This immediately surfaced pending purchase orders (e.g. `PO-2026-0002` with 175 units pending) previously hidden from dock workers.
+2. **Responsive Tablet & Header Polish**: Resolved header search bar text wrap and warehouse facility dropdown clipping on tablet viewports (768px) in `Header.tsx`, `InventoryPage.tsx`, `DashboardPage.tsx`, `SalesOrdersPage.tsx`, `ReceivingPage.tsx`, `PickingPage.tsx`, and `ReportsPage.tsx`.
+3. **Full Visual Evidence Suite**: Captured 21 high-fidelity screenshots in `screenshots/after/` across 7 core modules at 1440px desktop, 768px tablet, and 390px mobile.
+4. **All 27 Automated Tests Passing**: Maintained 100% test pass rate across all 5 backend test suites in ~790ms with zero typecheck or build errors.
 
 ---
 
@@ -24,118 +24,92 @@ All standard repository checks were executed directly with evidence-backed resul
 |---|---|:---:|---|
 | **Lint** | `npm run lint` | **PASSED** | Clean pass on both `backend` and `frontend` workspaces. |
 | **Typecheck** | `npm run typecheck` | **PASSED** | `tsc --noEmit` on both workspaces passed with 0 errors. |
-| **Automated Tests** | `npm run test` | **PASSED** | **26 / 26 tests passed** across 5 test suites in ~720ms. |
-| **Production Build** | `npm run build` | **PASSED** | Backend compiled via `tsc`; Frontend bundle generated via `vite build` into `frontend/dist`. |
+| **Automated Tests** | `npm run test` | **PASSED** | **27 / 27 tests passed** across 5 test suites in ~790ms. |
+| **Production Build** | `npm run build` | **PASSED** | Backend compiled via `tsc`; Frontend bundle generated via `vite build` into `frontend/dist` in 1.20s. |
 | **Database Seed** | `npm run db:seed` | **PASSED** | 2 warehouses, 130 bins, 50 SKUs, active/expired lots, POs, and SOs reconciled in PostgreSQL. |
 | **Live Health Check** | `GET /api/v1/health` | **PASSED** | Returns HTTP 200 `{"status":"healthy","database":"connected","system":"StockPilot WMS"}`. |
 
 ---
 
-## 3. Round 3 Quality Gate Hardening & Enhancements
+## 3. Premium UX Refinements & Indian Warehouse Localization
 
-During this quality gate turn, the following enhancements and hardening fixes were completed and verified:
+### A. Design Tokens, Shell & Localization
+- **Typography & Canvas**: Clean slate palette with soft neutral app canvas (`bg-slate-50`), white card surfaces, charcoal text, cool grey borders (`border-slate-200`), and tabular numerals (`tabular-nums font-mono`).
+- **Restrained Brand Accents**: Deep blue/indigo accents for active navigation, tabs, and primary actions; muted burnt orange (`#ea580c` / `bg-amber-600`) for high-frequency warehouse floor triggers.
+- **Indian Localization Suite**:
+  - `formatINR(val)`: Formats currency using Indian number grouping (`₹1,70,025.00`).
+  - `formatNumberIN(val)`: Formats quantities and counts with Indian numbering rules (`en-IN`).
+  - `formatIST(timestamp)`: Renders timestamps in `Asia/Kolkata` with date and time (`14 Oct 2026, 01:45 PM IST`).
+- **Navigation Architecture**: Streamlined main navigation into 7 core operational links:
+  1. `Home` (`/dashboard`)
+  2. `Orders` (`/sales-orders`)
+  3. `Inventory` (`/inventory`)
+  4. `Inward` (`/receiving`)
+  5. `Outward` (`/picking`)
+  6. `Locations` (`/locations`)
+  7. `Reports` (`/reports`)
+  - Secondary administration modules grouped under collapsible "Administration & More".
 
-1. **Approved Vendor Supplier Directory & Registration**:
-   - Implemented `POST /api/v1/inbound/suppliers` with strict Zod validation (`code`, `name`, `contactEmail`, `phone`, `address`, `city`, `country`) and duplicate code conflict guards (`DUPLICATE_CODE`).
-   - Implemented `GET /api/v1/inbound/suppliers` returning all verified vendor accounts.
-   - Built interactive tabbed interface in [frontend/src/pages/PurchaseOrdersPage.tsx](file:///Users/sakshantwaghmare/Projects/warehouse%20management%20system/frontend/src/pages/PurchaseOrdersPage.tsx) switching between "Purchase Orders" and "Approved Suppliers".
-   - Integrated live supplier selector dropdown in the Create PO modal, populated from PostgreSQL seeded suppliers (`Apex Industrial Supply`, `Titan Packaging`, etc.) resolving UUID validation constraints.
-   - Built "Register Approved Supplier" modal with real-time API persistence.
-
-2. **Customer Accounts Directory & Registration**:
-   - Implemented `POST /api/v1/outbound/customers` with strict Zod validation (`code`, `name`, `email`, `phone`, `shippingAddress`, `city`, `state`, `postalCode`) and duplicate code conflict guards (`DUPLICATE_CODE`).
-   - Implemented `GET /api/v1/outbound/customers` returning all active customer accounts.
-   - Built interactive tabbed interface in [frontend/src/pages/SalesOrdersPage.tsx](file:///Users/sakshantwaghmare/Projects/warehouse%20management%20system/frontend/src/pages/SalesOrdersPage.tsx) switching between "Customer Orders", "Stock Reservations", and "Customer Accounts".
-   - Built "Register Customer Account" modal and integrated live customer selector in Create Order modal.
-
-3. **Stock Reservations Audit Ledger**:
-   - Implemented `GET /api/v1/outbound/reservations` endpoint returning detailed reservation records with relational links to `SalesOrder`, `Customer`, `Product`, `Location`, and `Lot`.
-   - Built "Stock Reservations" ledger tab in [frontend/src/pages/SalesOrdersPage.tsx](file:///Users/sakshantwaghmare/Projects/warehouse%20management%20system/frontend/src/pages/SalesOrdersPage.tsx) displaying live reservation badges (`ACTIVE` in amber, `CONSUMED` in emerald, `RELEASED` in neutral) with filterable status tabs and real-time active counter.
-
-4. **Expanded Automated Test Suite (26 / 26 Tests Passed)**:
-   - Added tests in [backend/tests/api.test.ts](file:///Users/sakshantwaghmare/Projects/warehouse%20management%20system/backend/tests/api.test.ts):
-     - `GET /api/v1/inbound/suppliers`: Verifies active suppliers list for procurement.
-     - `POST /api/v1/inbound/suppliers`: Verifies creation of new approved vendors with unique codes.
-     - `GET /api/v1/outbound/customers`: Verifies customer account lookups for order entry.
-     - `POST /api/v1/outbound/customers`: Verifies customer registration with address and contact validation.
-     - `GET /api/v1/outbound/reservations`: Verifies stock reservation ledger with location and product balances.
-
-5. **OpenAPI / Swagger Documentation Enriched**:
-   - Updated [backend/src/server.ts](file:///Users/sakshantwaghmare/Projects/warehouse%20management%20system/backend/src/server.ts) Swagger specs with endpoints for `/inbound/suppliers`, `/outbound/customers`, and `/outbound/reservations`.
+### B. Core Page Workflows Verified
+1. **Home — "Today at the Warehouse" (`/dashboard`)**:
+   - Strictly 4 top clickable operational metrics: `Orders to Process`, `Inward Pending`, `Outward Pending`, `Low-Stock Items`.
+   - Two-column desktop composition: Left = Floor Work Queue with priority pills and direct action buttons; Right = Needs Attention (low-stock deficits, inbound PO receipts, reservations summary).
+   - Data-backed figures: Outbound Order Fulfillment Pipeline horizontal bar distribution and 7-day Inbound vs Outbound stock activity bar chart.
+2. **Orders — Work Queue First (`/sales-orders`)**:
+   - Work-queue-first tabs: `All Orders`, `New / To Allocate`, `To Pick`, `To Pack`, `Dispatched`, `Exceptions`.
+   - Neutral B2B channel pills: `Wholesale Dispatch`, `Direct Store`, `Marketplace B2B`, `Manual Sales Order` (no fake marketplace logos).
+   - Slide-out order detail drawer with customer shipping address, line items with INR unit and total pricing, and fulfillment lifecycle tracker.
+3. **Inventory — Rapid Stock Lookup (`/inventory`)**:
+   - Prominent full-width search input across SKU, product title, barcode, and bin location.
+   - Compact category dropdown and stock state filter pills (`All Stock`, `In Stock`, `Low Stock Deficit`, `Out of Stock`).
+   - Exact requested columns: `SKU`, `Product Name`, `Available`, `On Hand`, `Reserved`, `Bin / Location`, `Status`, `Actions`.
+   - Low-stock deficit badge displaying exact available vs min reorder threshold (`Avail: 5 / Min: 40`).
+   - Slide-out product detail drawer with stock composition arithmetic (`On Hand = Available + Reserved + Damaged`), cross-facility bin breakdown, active lots, and movement ledger.
+4. **Inward — 5-Stage Receiving Wizard (`/receiving`)**:
+   - Guided stepper: (1) Inbound PO & Dock, (2) Physical Check-In, (3) Quality & Triage, (4) Lots & Expiry, (5) Review & Confirm.
+   - Fixed PO query to load both `ORDERED` and `PARTIALLY_RECEIVED` POs, discovering `PO-2026-0002` with 175 units pending.
+   - Persistent live receipt manifest summary tracking SKU line count, physical units, accepted sellable, damaged quarantine, and rejected vendor return.
+5. **Outward — Picking Station (`/picking`)**:
+   - Outward guided stages pipeline: `Floor Picking (Active)` -> `Carton Packing` -> `Carrier Dispatch`.
+   - Prominent source storage bin badge with location icon (`EDC-ZB-A01-R01-S01-B01`).
+   - Real-time line progress indicator (`X of Y lines confirmed`).
+   - Discrepancy reason recording for short-picks.
+6. **Locations — Warehouse Topology (`/locations`)**:
+   - Hierarchical bin mapping: Zone, Aisle, Rack, Shelf, Bin.
+   - Real-time capacity and occupancy utilization progress meters.
+7. **Reports & Intelligence (`/reports`)**:
+   - Audit-ready inventory asset valuation in INR (`₹1,70,025.00`) with category asset spread stacked bar.
+   - Low-stock reorder deficit calculations with estimated replenishment capital.
+   - FEFO lot expiry aging schedule and bin space utilization meters.
 
 ---
 
-## 4. Module Implementation Matrix
+## 4. Visual Verification Evidence (CDP Screenshots)
 
-| Module / Domain | Backend API (`/api/v1`) | Frontend UI View | Strict Invariants Enforced | Status |
-|---|:---:|:---:|:---:|:---:|
-| **Authentication & RBAC** | `/auth/*` (Login, Me, Users) | `/login`, `/users` | Server-enforced 5-role permission gates | **COMPLETE** |
-| **Warehouse Facilities** | `/warehouses/*` | Header Facility Switcher | Active facility scope filtering | **COMPLETE** |
-| **Locations & Bins** | `/warehouses/:id/locations` | `/locations` | Hierarchy (Zone > Aisle > Rack > Shelf > Bin) + Occupancy | **COMPLETE** |
-| **Product Master Catalog** | `/products/*` (CRUD) | `/inventory` (Modal CRUD) | Safe deactivation guard (blocks if on-hand > 0) | **COMPLETE** |
-| **Inventory Balances** | `/inventory/balances` | `/inventory` | `available = on_hand - reserved - damaged >= 0` | **COMPLETE** |
-| **Cycle Count Adjustments** | `/inventory/adjust` | `/inventory` (Modal) | Mandatory documented reason; cannot breach reserved stock | **COMPLETE** |
-| **Bin-to-Bin Transfers** | `/inventory/transfer` | `/inventory` (Modal) | Atomic transaction: debits source, credits destination | **COMPLETE** |
-| **Inbound Purchase Orders** | `/inbound/purchase-orders` | `/purchase-orders` (Tab 1) | Line items, expected delivery, status lifecycle | **COMPLETE** |
-| **Approved Supplier Directory** | `/inbound/suppliers` (CRUD) | `/purchase-orders` (Tab 2) | Unique supplier codes, contact email, procurement link | **COMPLETE** |
-| **Dock Receiving Wizard** | `/inbound/receive` | `/receiving` | Multi-split (Accepted/Damaged/Rejected) + Lot/Expiry + Idempotency | **COMPLETE** |
-| **Put-Away Execution** | `/inbound/put-away-tasks` | `/put-away` | Auto-generated from receiving; moves stock from dock to bin | **COMPLETE** |
-| **Customer Sales Orders** | `/outbound/orders` | `/sales-orders` (Tab 1) | Order creation, addresses, status tracking | **COMPLETE** |
-| **Stock Reservations Ledger** | `/outbound/reservations` | `/sales-orders` (Tab 2) | Audit active, consumed, and released allocations | **COMPLETE** |
-| **Customer Accounts Directory** | `/outbound/customers` (CRUD) | `/sales-orders` (Tab 3) | Unique account code, address validation, order link | **COMPLETE** |
-| **Stock Allocation Engine** | `/outbound/orders/:id/allocate` | `/sales-orders` (Action) | Atomic reservation lock; prevents overselling across bins | **COMPLETE** |
-| **Picking Station** | `/outbound/pick-tasks` | `/picking` | Item-by-item confirmation with short-pick discrepancy reason | **COMPLETE** |
-| **Packing Station** | `/outbound/orders/:id/pack` | `/packing` | Container assignment, carton weight, packing slip manifest | **COMPLETE** |
-| **Shipping & Dispatch** | `/outbound/orders/:id/dispatch` | `/shipments` | Decrements on-hand & reserved; creates `ORDER_SHIP` movement | **COMPLETE** |
-| **Order Cancellation** | `/outbound/orders/:id/cancel` | `/sales-orders` (Action) | Releases active reservations atomically back to available | **COMPLETE** |
-| **Customer RMA Returns** | `/returns/*` | `/returns` | RMA authorization, physical inspection, Restock/Quarantine routing | **COMPLETE** |
-| **Stock Movement Ledger** | `/inventory/movements` | `/movements` | Immutable audit trail with before/after balance and user | **COMPLETE** |
-| **Valuation Analytics** | `/reports/valuation` | `/reports` (Tab 1) | Financial valuation by SKU, category, and margins | **COMPLETE** |
-| **Low-Stock Deficit Alerts** | `/reports/low-stock` | `/reports` (Tab 2) | Real-time threshold alerts and reorder quantity estimates | **COMPLETE** |
-| **FEFO Expiry Reports** | `/reports/lot-expiry` | `/reports` (Tab 3) | Lot aging, days remaining, near-expiry warnings | **COMPLETE** |
-| **Bin Space Utilization** | `/reports/utilization` | `/reports` (Tab 4) | Bin capacity vs occupancy utilization meters | **COMPLETE** |
-| **System Audit Trail** | `/audit/logs` | `/audit` | Chronological action log with JSON payload inspection | **COMPLETE** |
-| **Facility Settings** | `/health`, `/warehouses` | `/settings` | Real-time DB telemetry and demo persona switcher | **COMPLETE** |
+All screenshots were captured live using headless Google Chrome connected via native WebSocket Chrome DevTools Protocol (CDP) to the running local application (`http://localhost:5173`) authenticated as `admin@stockpilot.io`:
+
+| Module / View | Desktop (1440px) | Tablet (768px) | Mobile (390px) | Verification Assessment |
+|---|:---:|:---:|:---:|---|
+| **Dashboard** | `dashboard-1440.png` | `dashboard-768.png` | `dashboard-390.png` | Strictly 4 top metrics; 2-col queue and attention cards; responsive 2x2 grid on mobile; zero overflow. |
+| **Orders** | `orders-1440.png` | `orders-768.png` | `orders-390.png` | Clean queue-first table; neutral B2B channels; IST dates; drawer inspection; mobile card list. |
+| **Inventory** | `inventory-1440.png` | `inventory-768.png` | `inventory-390.png` | Prominent search; deficit badges; tabular quantities; tablet header buttons cleanly aligned. |
+| **Inward Receiving** | `receiving-1440.png` | `receiving-768.png` | `receiving-390.png` | 5-stage stepper; `PO-2026-0002` visible; persistent live receipt summary. |
+| **Outward Picking** | `picking-1440.png` | `picking-768.png` | `picking-390.png` | 3-stage outward pipeline; prominent source bin badge; line progress meter; confirm modal. |
+| **Locations** | `locations-1440.png` | `locations-768.png` | `locations-390.png` | Zone/aisle hierarchy; utilization meters; inspect modal; facility selector scoped. |
+| **Reports** | `reports-1440.png` | `reports-768.png` | `reports-390.png` | INR valuation (`₹1,70,025.00`); category asset distribution; FEFO lot aging; CSV export. |
 
 ---
 
 ## 5. Test Evidence & Coverage Summary
 
-### Unit & Domain Invariant Tests (`backend/tests/inventory.test.ts`)
-1. **Available Stock Invariant**: Proves `available = max(0, on_hand - reserved - damaged)` across all balance records.
-2. **Atomic Transfers**: Proves stock transferred between bins decrements source onHand and increments destination onHand atomically while logging a `TRANSFER` movement record.
-3. **Overselling Prevention**: Proves requests exceeding available stock throw an `INSUFFICIENT_AVAILABLE_STOCK` domain exception.
-4. **Reserved Stock Protection**: Proves manual adjustments cannot set onHand below currently reserved stock.
-5. **Idempotency Protection**: Proves duplicate receipts with the same `idempotencyKey` return existing receipts without duplicating physical inventory.
+### Automated Test Suites (`npm run test` -> `vitest run`)
+- `tests/inventory.test.ts` (5 tests): Available stock invariant (`available = max(0, onHand - reserved - damaged)`), atomic bin transfers, overselling prevention, reserved stock protection, and idempotency protection.
+- `tests/concurrency.test.ts` (1 test): Atomic conditional lock on limited inventory under parallel order allocation.
+- `tests/fulfillment.test.ts` (3 tests): End-to-end outbound lifecycle (`Create Order -> Allocate -> Pick -> Pack -> Dispatch`), order cancellation reservation release, and audit trail generation.
+- `tests/inbound_returns.test.ts` (3 tests): Inbound PO dock receiving with accepted/damaged split, customer RMA restock/quarantine, and authenticated query token CSV export.
+- `tests/api.test.ts` (15 tests): Health check, JWT authentication, warehouse listing, balance pagination, dashboard telemetry, RBAC 403 enforcement, catalog CRUD guards, approved supplier directory, customer accounts, and stock reservations ledger.
 
-### Concurrency Tests (`backend/tests/concurrency.test.ts`)
-1. **Atomic Conditional Lock on Limited Inventory**: Proves that concurrent allocations on scarce stock prevent overselling, allowing only eligible demand to succeed while throwing domain conflicts on shortages.
-
-### Outbound Fulfillment Lifecycle Tests (`backend/tests/fulfillment.test.ts`)
-1. **Complete Vertical Slice**: Proves `Create Order -> Allocate -> Pick -> Pack -> Dispatch` with inventory balance relief and `ORDER_SHIP` movement generation.
-2. **Order Cancellation & Reservation Release**: Proves order cancellation releases reserved inventory back to the available pool.
-3. **Audit Trail Verification**: Proves system audit logs are emitted for each state mutation.
-
-### Inbound, Put-Away & Returns Tests (`backend/tests/inbound_returns.test.ts`)
-1. **Dock Receiving & Put-Away**: Proves PO receiving with accepted/damaged split, dock balance creation, and subsequent put-away transfer to permanent storage.
-2. **Customer RMA Restock & Quarantine**: Proves RMA inspection with restock credits on-hand stock and emits `RETURN_RESTOCK`, while quarantine marks damaged units and emits `DAMAGE_WRITE_OFF`.
-3. **Query Token CSV Export**: Proves authenticated download of CSV data via URL query token.
-
-### API, Catalog, Partner & Reservation Tests (`backend/tests/api.test.ts`)
-1. `GET /api/v1/health`: Verifies live API status and PostgreSQL database connection.
-2. `POST /api/v1/auth/login`: Rejects invalid credentials with HTTP 401.
-3. `GET /api/v1/auth/me`: Verifies identity and role claims from JWT bearer token.
-4. `GET /api/v1/warehouses`: Validates warehouse listings with location counts.
-5. `GET /api/v1/inventory/balances`: Verifies calculated fields and pagination.
-6. `GET /api/v1/reports/dashboard`: Verifies aggregated KPIs and telemetry feeds.
-7. **RBAC Enforcement**: Verifies server-enforced HTTP 403 Forbidden when a `PICKER_PACKER` attempts an unauthorized inventory adjustment.
-8. `PUT /api/v1/products/:id`: Verifies authorized catalog specification updates and audit logging.
-9. `DELETE /api/v1/products/:id`: Verifies rejection of deactivating SKUs with physical stock on hand (`CANNOT_DELETE_ACTIVE_STOCK`).
-10. `GET /api/v1/inbound/suppliers`: Verifies retrieval of active suppliers.
-11. `POST /api/v1/inbound/suppliers`: Verifies creation of new approved vendors with unique codes.
-12. `GET /api/v1/outbound/customers`: Verifies customer account lookups.
-13. `POST /api/v1/outbound/customers`: Verifies customer registration with address and contact validation.
-14. `GET /api/v1/outbound/reservations`: Verifies stock reservation ledger retrieval with location and product balances.
+**Total**: **27 / 27 passing tests** (100% pass rate).
 
 ---
 
@@ -145,7 +119,7 @@ During this quality gate turn, the following enhancements and hardening fixes we
 - **Products**: 50 industrial SKUs across Electronics, PPE, Precision Tools, Packaging Materials, and Chemical Lubricants.
 - **Lots**: Deterministic lots with Active, Near-Expiry (<15 days), and Expired status for FEFO inspection.
 - **Suppliers & Customers**: Active verified vendors (`Apex Industrial Supply`, `Titan Packaging`) and customer accounts (`Nexus Logistics`, `Horizon Distribution`).
-- **Transactions**: Initial inventory balances reconciled with matching `PURCHASE_RECEIPT` movements. Open purchase orders and sales orders in various stages of fulfillment.
+- **Open Transactions**: `PO-2026-0002` (Titan Packaging, partially received, 175 units pending), 15 sales orders across new, allocated, and dispatched stages.
 
 ---
 
