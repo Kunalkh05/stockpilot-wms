@@ -95,8 +95,8 @@ export const UsersPage: React.FC = () => {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white border border-surface-200 rounded-lg overflow-hidden shadow-sm">
-        <table className="w-full text-left text-xs">
+      <div className="bg-white border border-surface-200 rounded-lg overflow-x-auto shadow-sm">
+        <table className="w-full min-w-[700px] text-left text-xs">
           <thead className="bg-surface-50 border-b border-surface-200 text-surface-500 uppercase tracking-wider font-mono text-[10px]">
             <tr>
               <th className="px-4 py-2.5">User</th>
