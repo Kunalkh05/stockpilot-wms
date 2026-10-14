@@ -873,7 +873,7 @@ export const SalesOrdersPage: React.FC = () => {
                   {getStatusBadge(selectedOrder.status)}
                 </div>
                 <div className="text-[11px] text-slate-600 mt-0.5">
-                  Placed on {formatIST(selectedOrder.createdAt)}
+                  Placed on {formatIST(selectedOrder.orderDate)}
                 </div>
               </div>
               <button
