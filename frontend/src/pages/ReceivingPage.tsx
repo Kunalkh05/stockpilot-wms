@@ -311,7 +311,7 @@ export const ReceivingPage: React.FC = () => {
                         <div className="text-slate-600 mt-1">{po.supplier?.name}</div>
                         <div className="text-[11px] text-slate-500 font-mono mt-0.5">
                           {po.items.length} product line(s) • Expected delivery:{' '}
-                          {po.expectedDeliveryDate ? formatIST(po.expectedDeliveryDate, false) : 'Standard'}
+                          {po.expectedDate ? formatIST(po.expectedDate, false) : 'Standard'}
                         </div>
                       </div>
                     );
