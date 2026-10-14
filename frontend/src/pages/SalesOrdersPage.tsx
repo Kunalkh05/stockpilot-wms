@@ -563,8 +563,8 @@ export const SalesOrdersPage: React.FC = () => {
                           </td>
 
                           <td className="px-4 py-3 font-mono text-slate-600 whitespace-nowrap">
-                            <div className="text-xs text-slate-900">{formatIST(order.createdAt, false)}</div>
-                            <div className="text-[10px] text-slate-600">{formatRelativeTime(order.createdAt)}</div>
+                            <div className="text-xs text-slate-900">{formatIST(order.orderDate, false)}</div>
+                            <div className="text-[10px] text-slate-600">{formatRelativeTime(order.orderDate)}</div>
                           </td>
 
                           <td className="px-4 py-3 font-mono">
