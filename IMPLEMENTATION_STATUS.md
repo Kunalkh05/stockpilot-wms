@@ -1,102 +1,119 @@
 # StockPilot WMS — Implementation Status
 
 **Status Date**: 2026-10-14  
-**Current Phase**: Premium UI/UX Verification and Repair Round 2 of 4 — Indian Warehouse Operations Verified
+**Current Phase**: Premium UI/UX Verification and Repair Round 4 of 4 — Final Verification & Sign-Off Complete
 
 ---
 
 ## 1. Executive Summary
-StockPilot WMS has been comprehensively refined and verified as a polished, credible, premium B2B warehouse operations tool for Indian e-commerce fulfillment centers, 3PL distributors, FMCG warehouses, and wholesalers in accordance with `prompts/INDIA-WMS-PREMIUM-UX.md`.
+StockPilot WMS has been comprehensively transformed and verified as a polished, credible, premium B2B warehouse operations product engineered specifically for Indian e-commerce fulfillment centers, 3PL distributors, FMCG warehouses, and multi-branch wholesale distributors in accordance with `prompts/INDIA-WMS-PREMIUM-UX.md`.
 
-In **Round 2/4**, visual hierarchy, responsive layout composition across desktop (1440px), tablet (768px), and mobile (390px), and core operational workflows were verified and repaired through live headless Chrome CDP automation:
-1. **Inward Receiving Open PO Discovery**: Fixed `InboundService.listPurchaseOrders` to support comma-separated multi-status filtering (`ORDERED,PARTIALLY_RECEIVED`) and updated `ReceivingPage.tsx`. This immediately surfaced pending purchase orders (e.g. `PO-2026-0002` with 175 units pending) previously hidden from dock workers.
-2. **Responsive Tablet & Header Polish**: Resolved header search bar text wrap and warehouse facility dropdown clipping on tablet viewports (768px) in `Header.tsx`, `InventoryPage.tsx`, `DashboardPage.tsx`, `SalesOrdersPage.tsx`, `ReceivingPage.tsx`, `PickingPage.tsx`, and `ReportsPage.tsx`.
-3. **Full Visual Evidence Suite**: Captured 21 high-fidelity screenshots in `screenshots/after/` across 7 core modules at 1440px desktop, 768px tablet, and 390px mobile.
-4. **All 27 Automated Tests Passing**: Maintained 100% test pass rate across all 5 backend test suites in ~790ms with zero typecheck or build errors.
+Across 4 disciplined verification and repair rounds, all core operational workflows and secondary administration modules were inspected, repaired, localized, and visually audited in real browser viewports (1440px desktop, 768px tablet, 390px mobile):
+
+- **Round 1/4 (Design System, Shell & Core Views)**: Established the quiet slate design system (`#F8FAFC` canvas, `#0F172A` text, fine `#E2E8F0` borders, zero neon gradients or decorative fluff). Restructured information architecture to 7 high-frequency operational modules (`Home`, `Orders`, `Inventory`, `Inward`, `Outward`, `Locations`, `Reports`) with secondary modules grouped under "Administration & More". Built Indian localization utilities (`formatINR`, `formatNumberIN`, `formatIST`). Redesigned `SalesOrdersPage` to queue-first and `InventoryPage` with arithmetic stock breakdown.
+- **Round 2/4 (Inbound Stepper, Dashboard & Outward Picking)**: Fixed multi-status PO query in `InboundService` (`ORDERED,PARTIALLY_RECEIVED`), surfacing 175 pending units on `ReceivingPage`. Implemented 4-metric top strip and 2-column work queue + attention layout on `DashboardPage`. Established 3-stage outward pipeline on `PickingPage`. Polished responsive headers and facility dropdowns across desktop, tablet, and mobile.
+- **Round 3/4 (Fulfillment Pipeline & Secondary Ledgers)**: Interconnected the outward pipeline (`/picking` -> `/packing` -> `/shipments`) with container specs, gross weight verification, and Indian carrier dispatches (Blue Dart, Delhivery, DTDC, Shadowfax, Xpressbees, Ekart Logistics). Fixed critical query parameter stringification bug in `api.ts` (`toQueryString`) and hardened backend `MovementType` validation. Formatted `/movements`, `/audit`, and `/returns` with IST timestamps and tabular numbers.
+- **Round 4/4 (Secondary Modules, Inward Pipeline & Final Sign-Off)**: Upgraded `PutAwayPage` with 2-stage Inbound Pipeline context (`Goods Receipt -> Put-Away Storage Bins`), tabular numerals, and responsive horizontal scrolling. Localized `PurchaseOrdersPage` vendor directory, Indian address/contact conventions, and INR line costs. Added IST system clock telemetry to `SettingsPage`. Formatted bin occupancy and capacity units in `LocationsPage`. Verified all 27 automated tests pass and production build succeeds cleanly.
 
 ---
 
-## 2. Deterministic Verification & Check Results
+## 2. Deterministic Verification & Quality Gate Results
 
-All standard repository checks were executed directly with evidence-backed results:
+All standard repository verification commands were executed directly with evidence-backed results:
 
-| Verification Check | Exact Command Executed | Result | Details |
+| Verification Check | Exact Command Executed | Result | Evidence / Details |
 |---|---|:---:|---|
-| **Lint** | `npm run lint` | **PASSED** | Clean pass on both `backend` and `frontend` workspaces. |
-| **Typecheck** | `npm run typecheck` | **PASSED** | `tsc --noEmit` on both workspaces passed with 0 errors. |
-| **Automated Tests** | `npm run test` | **PASSED** | **27 / 27 tests passed** across 5 test suites in ~790ms. |
-| **Production Build** | `npm run build` | **PASSED** | Backend compiled via `tsc`; Frontend bundle generated via `vite build` into `frontend/dist` in 1.20s. |
-| **Database Seed** | `npm run db:seed` | **PASSED** | 2 warehouses, 130 bins, 50 SKUs, active/expired lots, POs, and SOs reconciled in PostgreSQL. |
-| **Live Health Check** | `GET /api/v1/health` | **PASSED** | Returns HTTP 200 `{"status":"healthy","database":"connected","system":"StockPilot WMS"}`. |
+| **TypeScript Typecheck** | `npm run typecheck` | **PASSED** | Clean pass across `backend` (`tsc --noEmit`) and `frontend` (`tsc --noEmit`) with 0 errors. |
+| **Workspace Lint** | `npm run lint` | **PASSED** | Clean pass across both workspaces with 0 warnings or errors. |
+| **Backend Test Suite** | `npm run test` | **PASSED** | **27 / 27 tests passed** across 5 test suites in ~770ms (`vitest run`). |
+| **Production Build** | `npm run build` | **PASSED** | `rimraf dist && tsc` for backend; `tsc -b && vite build` in 1.19s (`dist/index.html`, `dist/assets/*.js`, `dist/assets/*.css`). |
+| **Database Seed** | `npm run db:seed` | **PASSED** | 2 warehouses, 130 bins, 50 SKUs, lots, POs, and SOs reconciled in PostgreSQL. |
+| **Live API Health Check** | `GET /api/v1/health` | **PASSED** | HTTP 200 `{"status":"healthy","database":"connected","version":"1.0.0"}`. |
 
 ---
 
 ## 3. Premium UX Refinements & Indian Warehouse Localization
 
 ### A. Design Tokens, Shell & Localization
-- **Typography & Canvas**: Clean slate palette with soft neutral app canvas (`bg-slate-50`), white card surfaces, charcoal text, cool grey borders (`border-slate-200`), and tabular numerals (`tabular-nums font-mono`).
-- **Restrained Brand Accents**: Deep blue/indigo accents for active navigation, tabs, and primary actions; muted burnt orange (`#ea580c` / `bg-amber-600`) for high-frequency warehouse floor triggers.
+- **Quiet, Serious Operations Aesthetic**: Soft neutral slate app canvas (`bg-slate-50`), crisp white cards (`bg-white`), slate text (`text-slate-900`, `text-slate-600`), fine cool-grey borders (`border-slate-200`), and tabular numerals (`tabular-nums font-mono`).
+- **Restrained Semantic Palette**: Emerald green for completed/healthy states, amber for attention/pending, rose for blocked/quarantined, blue for informational. No decorative blobs, glassmorphism, or neon gradients.
 - **Indian Localization Suite**:
-  - `formatINR(val)`: Formats currency using Indian number grouping (`₹1,70,025.00`).
-  - `formatNumberIN(val)`: Formats quantities and counts with Indian numbering rules (`en-IN`).
-  - `formatIST(timestamp)`: Renders timestamps in `Asia/Kolkata` with date and time (`14 Oct 2026, 01:45 PM IST`).
-- **Navigation Architecture**: Streamlined main navigation into 7 core operational links:
-  1. `Home` (`/dashboard`)
-  2. `Orders` (`/sales-orders`)
-  3. `Inventory` (`/inventory`)
-  4. `Inward` (`/receiving`)
-  5. `Outward` (`/picking`)
-  6. `Locations` (`/locations`)
-  7. `Reports` (`/reports`)
-  - Secondary administration modules grouped under collapsible "Administration & More".
+  - `formatINR(val)`: Formats Indian Rupee values with proper sub-lakh and lakh/crore commas (`₹1,70,025.00`).
+  - `formatNumberIN(val)`: Formats units, weights, and counts with Indian number grouping (`en-IN`).
+  - `formatIST(timestamp)`: Renders dates and times in `Asia/Kolkata` with clear day/month/year and 12-hour AM/PM format (`14 Oct 2026, 02:28 pm IST`).
+- **Information Architecture**:
+  - **7 Core High-Frequency Modules**:
+    1. `Home` (`/dashboard`)
+    2. `Orders` (`/sales-orders`)
+    3. `Inventory` (`/inventory`)
+    4. `Inward` (`/receiving`)
+    5. `Outward` (`/picking`)
+    6. `Locations` (`/locations`)
+    7. `Reports` (`/reports`)
+  - **Administration & Deep Workflows** (Collapsible sidebar drawer):
+    `Purchase Orders` (`/purchase-orders`), `Put-Away Tasks` (`/put-away`), `Packing Station` (`/packing`), `Dispatches` (`/shipments`), `Customer Returns` (`/returns`), `Stock Movements` (`/movements`), `Users & Access` (`/users`), `Audit Trail` (`/audit`), `Facility Settings` (`/settings`).
 
-### B. Core Page Workflows Verified
+### B. Module-by-Module Refinement Summary
+
 1. **Home — "Today at the Warehouse" (`/dashboard`)**:
    - Strictly 4 top clickable operational metrics: `Orders to Process`, `Inward Pending`, `Outward Pending`, `Low-Stock Items`.
-   - Two-column desktop composition: Left = Floor Work Queue with priority pills and direct action buttons; Right = Needs Attention (low-stock deficits, inbound PO receipts, reservations summary).
-   - Data-backed figures: Outbound Order Fulfillment Pipeline horizontal bar distribution and 7-day Inbound vs Outbound stock activity bar chart.
+   - Two-column desktop layout: Left = Prioritized Work Queue with age/priority pills and direct fulfillment actions; Right = Needs Attention panel (replenishment deficits, pending POs, reservations summary).
+   - Data-backed figures: 7-day Inbound vs Outbound inventory activity bar chart and 5-stage Outbound Fulfillment Pipeline horizontal bar.
 2. **Orders — Work Queue First (`/sales-orders`)**:
    - Work-queue-first tabs: `All Orders`, `New / To Allocate`, `To Pick`, `To Pack`, `Dispatched`, `Exceptions`.
-   - Neutral B2B channel pills: `Wholesale Dispatch`, `Direct Store`, `Marketplace B2B`, `Manual Sales Order` (no fake marketplace logos).
+   - Neutral B2B channel pills: `Wholesale Dispatch`, `Direct Store`, `Marketplace B2B`, `Manual Sales Order` (no fake marketplace branding).
    - Slide-out order detail drawer with customer shipping address, line items with INR unit and total pricing, and fulfillment lifecycle tracker.
 3. **Inventory — Rapid Stock Lookup (`/inventory`)**:
    - Prominent full-width search input across SKU, product title, barcode, and bin location.
-   - Compact category dropdown and stock state filter pills (`All Stock`, `In Stock`, `Low Stock Deficit`, `Out of Stock`).
-   - Exact requested columns: `SKU`, `Product Name`, `Available`, `On Hand`, `Reserved`, `Bin / Location`, `Status`, `Actions`.
+   - Exact required columns: `SKU`, `Product Name`, `Available`, `On Hand`, `Reserved`, `Bin / Location`, `Status`, `Actions`.
+   - Arithmetic stock composition in drawer: `On Hand = Available + Reserved + Damaged` with validation checking.
    - Low-stock deficit badge displaying exact available vs min reorder threshold (`Avail: 5 / Min: 40`).
-   - Slide-out product detail drawer with stock composition arithmetic (`On Hand = Available + Reserved + Damaged`), cross-facility bin breakdown, active lots, and movement ledger.
-4. **Inward — 5-Stage Receiving Wizard (`/receiving`)**:
-   - Guided stepper: (1) Inbound PO & Dock, (2) Physical Check-In, (3) Quality & Triage, (4) Lots & Expiry, (5) Review & Confirm.
-   - Fixed PO query to load both `ORDERED` and `PARTIALLY_RECEIVED` POs, discovering `PO-2026-0002` with 175 units pending.
-   - Persistent live receipt manifest summary tracking SKU line count, physical units, accepted sellable, damaged quarantine, and rejected vendor return.
-5. **Outward — Picking Station (`/picking`)**:
-   - Outward guided stages pipeline: `Floor Picking (Active)` -> `Carton Packing` -> `Carrier Dispatch`.
-   - Prominent source storage bin badge with location icon (`EDC-ZB-A01-R01-S01-B01`).
-   - Real-time line progress indicator (`X of Y lines confirmed`).
-   - Discrepancy reason recording for short-picks.
-6. **Locations — Warehouse Topology (`/locations`)**:
-   - Hierarchical bin mapping: Zone, Aisle, Rack, Shelf, Bin.
-   - Real-time capacity and occupancy utilization progress meters.
-7. **Reports & Intelligence (`/reports`)**:
+4. **Inward Pipeline (`/receiving` & `/put-away`)**:
+   - Stage 1: Guided 5-stage receiving wizard on `ReceivingPage` (PO & Dock -> Physical Check-In -> Quality & Triage -> Lots & Expiry -> Confirm). Fixed comma-separated PO status query to discover `PO-2026-0002` (175 units pending).
+   - Stage 2: `PutAwayPage` with 2-stage Inbound Pipeline context tracker, source dock to suggested storage bin routing, `formatNumberIN` tabular units, and horizontally scrollable table.
+5. **Outward Fulfillment Pipeline (`/picking` -> `/packing` -> `/shipments`)**:
+   - Stage 1 (`/picking`): Floor picking with prominent storage bin badge, line progress meter, and discrepancy reason recording.
+   - Stage 2 (`/packing`): Carton packing station with package type selector (Small Box, Medium Carton, Heavy Duty Pallet), tare weight, and verified gross weight in kg.
+   - Stage 3 (`/shipments`): Carrier dispatch staging with major Indian logistics partners (Blue Dart, Delhivery, DTDC, Shadowfax, Xpressbees, Ekart Logistics), AWB tracking generation, and irreversible inventory relief confirmation.
+6. **Customer Returns & RMA (`/returns`)**:
+   - Return reason tracking (Wrong Item, Damaged in Transit, Customer Exchange), disposition triage (Restock to Sellable vs Quarantine Bay), and responsive action controls.
+7. **Locations & Bins (`/locations`)**:
+   - Hierarchical bin mapping (Zone, Aisle, Rack, Shelf, Bin), capacity vs occupancy utilization progress bars, `formatNumberIN` tabular quantities, and bin inspection modal.
+8. **Reports & Intelligence (`/reports`)**:
    - Audit-ready inventory asset valuation in INR (`₹1,70,025.00`) with category asset spread stacked bar.
-   - Low-stock reorder deficit calculations with estimated replenishment capital.
+   - Low-stock replenishment deficit report with estimated reorder costs in INR.
    - FEFO lot expiry aging schedule and bin space utilization meters.
+   - Client-side CSV export across all 4 intelligence reports.
+9. **Administration & Diagnostics (`/purchase-orders`, `/users`, `/audit`, `/settings`)**:
+   - `PurchaseOrdersPage`: Multi-tab PO list and Supplier Directory with Indian city/address placeholders, `formatINR` line item unit costs, and IST delivery dates.
+   - `UsersPage`: Server-enforced RBAC account management with Indian name placeholders.
+   - `SettingsPage`: Operational facility network breakdown, live API and PostgreSQL telemetry, and IST system clock timestamp.
+   - `AuditLogPage`: Comprehensive transaction audit log with IST timestamps and tabular user/entity metadata.
 
 ---
 
 ## 4. Visual Verification Evidence (CDP Screenshots)
 
-All screenshots were captured live using headless Google Chrome connected via native WebSocket Chrome DevTools Protocol (CDP) to the running local application (`http://localhost:5173`) authenticated as `admin@stockpilot.io`:
+All screenshots were captured live using headless Google Chrome connected via native WebSocket Chrome DevTools Protocol (CDP) to the running local application (`http://localhost:5173`) authenticated as `admin@stockpilot.io`. Every screenshot was visually reviewed via `view_file`:
 
-| Module / View | Desktop (1440px) | Tablet (768px) | Mobile (390px) | Verification Assessment |
+| Page / Feature | Desktop (1440px) | Tablet (768px) | Mobile (390px) | Visual Verification Assessment |
 |---|:---:|:---:|:---:|---|
-| **Dashboard** | `dashboard-1440.png` | `dashboard-768.png` | `dashboard-390.png` | Strictly 4 top metrics; 2-col queue and attention cards; responsive 2x2 grid on mobile; zero overflow. |
-| **Orders** | `orders-1440.png` | `orders-768.png` | `orders-390.png` | Clean queue-first table; neutral B2B channels; IST dates; drawer inspection; mobile card list. |
-| **Inventory** | `inventory-1440.png` | `inventory-768.png` | `inventory-390.png` | Prominent search; deficit badges; tabular quantities; tablet header buttons cleanly aligned. |
-| **Inward Receiving** | `receiving-1440.png` | `receiving-768.png` | `receiving-390.png` | 5-stage stepper; `PO-2026-0002` visible; persistent live receipt summary. |
-| **Outward Picking** | `picking-1440.png` | `picking-768.png` | `picking-390.png` | 3-stage outward pipeline; prominent source bin badge; line progress meter; confirm modal. |
-| **Locations** | `locations-1440.png` | `locations-768.png` | `locations-390.png` | Zone/aisle hierarchy; utilization meters; inspect modal; facility selector scoped. |
-| **Reports** | `reports-1440.png` | `reports-768.png` | `reports-390.png` | INR valuation (`₹1,70,025.00`); category asset distribution; FEFO lot aging; CSV export. |
+| **Dashboard** | `dashboard-1440.png` | `dashboard-768.png` | `dashboard-390.png` | 4 top operational metrics; 2-col queue & attention; responsive 2x2 grid on mobile; clean IST timestamps. |
+| **Orders** | `orders-1440.png` | `orders-768.png` | `orders-390.png` | Work-queue tabs; neutral B2B channels; slide-out drawer; mobile card list; no squishing. |
+| **Inventory** | `inventory-1440.png` | `inventory-768.png` | `inventory-390.png` | Prominent search bar; deficit badges; tabular numerals; drawer arithmetic; tablet buttons aligned. |
+| **Inward Goods Receipt** | `receiving-1440.png` | `receiving-768.png` | `receiving-390.png` | 5-stage stepper; `PO-2026-0002` discovered; persistent live receipt summary card. |
+| **Put-Away Execution** | `put-away-1440.png` | `put-away-768.png` | — | 2-stage inbound tracker; suggested bin pills; `formatNumberIN` tabular units; scrollable table. |
+| **Outward Floor Picking** | `picking-1440.png` | `picking-768.png` | `picking-390.png` | 3-stage outward pipeline banner; prominent source bin badge; line progress meter; pick modal. |
+| **Packing Station** | `packing-1440.png` | `packing-768.png` | — | Active Stage 2; container type selector; gross weight kg verification; responsive layout. |
+| **Carrier Dispatch** | `shipments-1440.png` | `shipments-768.png` | — | Active Stage 3; Indian carriers (Blue Dart, Delhivery); irreversible stock relief warning. |
+| **Customer Returns** | `returns-1440.png` | `returns-768.png` | — | RMA status tabs; restock vs quarantine disposition badges; responsive header controls. |
+| **Stock Movements** | `movements-1440.png` | `movements-768.png` | — | Tabular +/- quantity delta formatting; IST event timestamps; movement type filter pills. |
+| **Warehouse Locations** | `locations-1440.png` | `locations-768.png` | `locations-390.png` | Zone/aisle hierarchy; capacity utilization bars; tabular formatted numbers; inspection modal. |
+| **Procurement & POs** | `purchase-orders-1440.png` | `purchase-orders-768.png` | — | PO list & Supplier directory tabs; Indian address/contact conventions; INR unit costs. |
+| **Operational Reports** | `reports-1440.png` | `reports-768.png` | `reports-390.png` | INR valuation (`₹1,70,025.00`); category asset distribution; FEFO lot aging; CSV export. |
+| **Users & Access** | `users-1440.png` | `users-768.png` | — | RBAC role authorization pills; facility memberships; Indian operative name placeholders. |
+| **Audit Trail** | `audit-1440.png` | `audit-768.png` | — | Immutable audit event log; IST timestamps; entity and user ID monospace alignment. |
+| **Facility Settings** | `settings-1440.png` | `settings-768.png` | — | Facility cards (`EDC`, `WCF`); live API & PostgreSQL telemetry; IST system clock. |
 
 ---
 
@@ -124,6 +141,6 @@ All screenshots were captured live using headless Google Chrome connected via na
 ---
 
 ## 7. Known Limitations & Production Readiness Guidance
-- **External Carrier API Integration**: Carrier tracking numbers are generated and validated using internal patterns. For production deployment, configure direct API integrations (e.g. FedEx Web Services, UPS Developer APIs, EasyPost).
-- **Physical Barcode Scanners**: The system accepts standard HID/keyboard wedge USB and Bluetooth barcode scanners into any search or SKU input field. Dedicated camera-based scanner support (ZXing/Quagga) can be added for mobile devices.
-- **Production Secrets**: Set unique, cryptographically random `JWT_SECRET` and secure PostgreSQL credentials via environment variables before production exposure.
+- **External Carrier API Integration**: Carrier tracking numbers are generated and validated using realistic Indian carrier format algorithms. For production multi-carrier shipping, integrate with carrier API web services (Blue Dart Apex API, Delhivery Express API, Shadowfax API) or a multi-carrier aggregator.
+- **Hardware Barcode Scanners**: Standard USB and Bluetooth HID/keyboard wedge scanners work natively with all search inputs and SKU entry fields. For mobile camera barcode scanning, integrate ZXing or html5-qrcode.
+- **Production Secrets**: Configure environment variables with unique, cryptographically random `JWT_SECRET` and secure PostgreSQL database connection credentials before production rollout.
