@@ -295,11 +295,11 @@ export const LocationsPage: React.FC = () => {
                         {loc.status}
                       </span>
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono font-medium">
-                      {loc.occupancyUnits || 0}
+                    <td className="px-4 py-2.5 text-right font-mono font-medium tabular-nums">
+                      {formatNumberIN(loc.occupancyUnits || 0)}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-surface-500">
-                      {loc.capacityUnits}
+                    <td className="px-4 py-2.5 text-right font-mono text-surface-500 tabular-nums">
+                      {formatNumberIN(loc.capacityUnits)}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-2">
@@ -509,8 +509,8 @@ export const LocationsPage: React.FC = () => {
             <div className="p-3 bg-surface-50 border border-surface-200 rounded space-y-1.5">
               <div className="flex items-center justify-between text-xs font-mono">
                 <span className="text-surface-600">Storage Utilization:</span>
-                <span className="font-bold text-surface-900">
-                  {selectedLocation.occupancyUnits || 0} / {selectedLocation.capacityUnits} units (
+                <span className="font-bold text-surface-900 tabular-nums">
+                  {formatNumberIN(selectedLocation.occupancyUnits || 0)} / {formatNumberIN(selectedLocation.capacityUnits)} units (
                   {selectedLocation.utilizationPercent || 0}%)
                 </span>
               </div>
@@ -565,17 +565,17 @@ export const LocationsPage: React.FC = () => {
                           <td className="px-3 py-2 text-surface-700 font-sans truncate max-w-xs">
                             {bal.product?.name}
                           </td>
-                          <td className="px-3 py-2 text-right text-surface-900 font-bold">
-                            {bal.onHand}
+                          <td className="px-3 py-2 text-right text-surface-900 font-bold tabular-nums">
+                            {formatNumberIN(bal.onHand)}
                           </td>
-                          <td className="px-3 py-2 text-right text-amber-700">
-                            {bal.reserved}
+                          <td className="px-3 py-2 text-right text-amber-700 tabular-nums">
+                            {formatNumberIN(bal.reserved)}
                           </td>
-                          <td className="px-3 py-2 text-right text-emerald-700 font-bold">
-                            {bal.available ?? (bal.onHand - bal.reserved - bal.damaged)}
+                          <td className="px-3 py-2 text-right text-emerald-700 font-bold tabular-nums">
+                            {formatNumberIN(bal.available ?? (bal.onHand - bal.reserved - bal.damaged))}
                           </td>
-                          <td className="px-3 py-2 text-right text-rose-700">
-                            {bal.damaged}
+                          <td className="px-3 py-2 text-right text-rose-700 tabular-nums">
+                            {formatNumberIN(bal.damaged)}
                           </td>
                         </tr>
                       ))
