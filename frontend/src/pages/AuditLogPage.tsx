@@ -4,6 +4,7 @@ import { api } from '../services/api.js';
 import { Button } from '../components/common/Button.js';
 import { Badge } from '../components/common/Badge.js';
 import { Modal } from '../components/common/Modal.js';
+import { formatIST } from '../utils/formatters.js';
 import { toast } from 'sonner';
 
 export const AuditLogPage: React.FC = () => {
