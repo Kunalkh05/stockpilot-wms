@@ -132,8 +132,8 @@ export const AuditLogPage: React.FC = () => {
             ) : (
               logs.map((log) => (
                 <tr key={log.id} className="hover:bg-surface-50/70 transition-colors">
-                  <td className="px-4 py-2.5 font-mono text-surface-500 text-[11px] whitespace-nowrap">
-                    {new Date(log.createdAt).toLocaleString()}
+                  <td className="px-4 py-2.5 font-mono text-surface-500 text-[11px] whitespace-nowrap tabular-nums">
+                    {formatIST(log.createdAt)}
                   </td>
                   <td className="px-4 py-2.5">
                     <Badge variant="neutral" size="sm">
