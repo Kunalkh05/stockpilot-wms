@@ -9,6 +9,7 @@ import { SearchInput } from '../components/common/SearchInput.js';
 import { Badge } from '../components/common/Badge.js';
 import { Modal } from '../components/common/Modal.js';
 import { toast } from 'sonner';
+import { formatINR, formatNumberIN, formatIST } from '../utils/formatters.js';
 
 export const PurchaseOrdersPage: React.FC = () => {
   const { selectedWarehouseId } = useWarehouse();
@@ -334,14 +335,14 @@ export const PurchaseOrdersPage: React.FC = () => {
                         <td className="px-4 py-3 text-surface-600 font-mono">
                           {po.items.length} line(s)
                         </td>
-                        <td className="px-4 py-3 text-right font-mono font-medium">
-                          {totalExpected}
+                        <td className="px-4 py-3 text-right font-mono font-medium tabular-nums">
+                          {formatNumberIN(totalExpected)}
                         </td>
-                        <td className="px-4 py-3 text-right font-mono font-medium text-emerald-700">
-                          {totalReceived}
+                        <td className="px-4 py-3 text-right font-mono font-medium text-emerald-700 tabular-nums">
+                          {formatNumberIN(totalReceived)}
                         </td>
                         <td className="px-4 py-3 text-surface-500 font-mono text-[11px]">
-                          {po.expectedDate ? new Date(po.expectedDate).toLocaleDateString() : 'N/A'}
+                          {po.expectedDate ? formatIST(po.expectedDate, false) : 'N/A'}
                         </td>
                       </tr>
                     );
@@ -412,7 +413,7 @@ export const PurchaseOrdersPage: React.FC = () => {
                       <td className="px-4 py-3 text-surface-600">
                         <div className="flex items-center gap-1.5">
                           <MapPin className="w-3 h-3 text-surface-400" />
-                          <span>{[sup.city, (sup as any).country || 'USA'].filter(Boolean).join(', ')}</span>
+                          <span>{[sup.city, (sup as any).country || 'India'].filter(Boolean).join(', ')}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
