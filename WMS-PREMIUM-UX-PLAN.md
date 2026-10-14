@@ -20,43 +20,43 @@ Transform StockPilot WMS into a calm, precise, and dependable B2B operations too
 ## Implementation Checklist
 
 - [x] Baseline Visual Inspection via Chrome DevTools Protocol (Desktop 1440px & Mobile 390px)
-- [ ] **1. Design Tokens & Indian Locale Utilities**
-  - [ ] Add `formatINR(amount)` and `formatIST(date)` helper functions in `src/utils/formatters.ts`
-  - [ ] Standardize typography, tabular numerals (`tabular-nums font-mono`), and semantic color tokens in `tailwind.config.js` and `index.css`
-- [ ] **2. Navigation & App Shell Overhaul**
-  - [ ] Compact 7-item main navigation: Home, Orders, Inventory, Inward, Outward, Locations, Reports
-  - [ ] Secondary "Administration & More" drawer/menu for Purchase Orders, Suppliers, Customers, Returns, Movements, Users, Audit, Settings
-  - [ ] Top bar with facility switcher, contextual breadcrumbs, functional global search (Cmd+K), and user/demo role switcher
-  - [ ] Fully responsive drawer and optimized mobile navigation header
-- [ ] **3. Home — "Today at the warehouse"**
-  - [ ] Top strip with <=4 compact operational metrics: Orders to Process, Inward Pending, Outward Pending, Low-Stock Items
-  - [ ] Left column: Work Queue with prioritized floor tasks, priority badges, context, and immediate action buttons
-  - [ ] Right column: Needs Attention with low-stock alerts, damaged units, pending receipts
-  - [ ] One real-data operational figure: 7-day fulfillment pipeline & movement stage distribution with tooltips and empty states
-  - [ ] Compact recent movement ledger table
-- [ ] **4. Orders — Work Queue First**
-  - [ ] Segmented tabs: All, New (Pending Allocation), To Pick, To Pack, Dispatched, Exceptions
-  - [ ] Columns: Order ID, Channel/Source (neutral labels), Date/Time (IST), Item Lines, Fulfillment State, Priority, Next Action
-  - [ ] Slide-out Order Detail drawer with line items, reservation status, customer details, and workflow action triggers
-  - [ ] Search, status filtering, and one-click clear filters
-- [ ] **5. Inventory — Fast Stock Lookup**
-  - [ ] Prominent instant search for SKU, Product Name, Barcode, Bin
-  - [ ] Clear columns: SKU, Product Name, Available, On Hand, Reserved, Bin/Location, Status
-  - [ ] Right-aligned tabular numeric quantities, deficit alerts on low stock
-  - [ ] Slide-out Product Detail drawer with Overview, Bin Allocations, Movement History, and Stock Composition Bar
-- [ ] **6. Inward — Guided Receiving Wizard**
-  - [ ] 5-step staged receiving wizard: 1. Inbound PO -> 2. SKU/Item Entry -> 3. Quantity Breakdown -> 4. Bin & Lot Assignment -> 5. Review & Confirm
-  - [ ] Live summary panel updating dynamically from form state
-  - [ ] Duplicate submission prevention and clear confirmation
-- [ ] **7. Outward — Guided Picking, Packing & Dispatch**
-  - [ ] Prominent source bin display for warehouse pickers
-  - [ ] Pick progress indicator derived from real line counts
-  - [ ] Short-pick discrepancy recording with reason codes
-  - [ ] Seamless handover to packing & dispatch
-- [ ] **8. Locations & Reports Refinement**
-  - [ ] Locations: Clean Zone > Aisle > Rack > Bin hierarchy with occupancy bars
-  - [ ] Reports: INR valuation formatting, low-stock deficit analysis, lot expiry schedule
-- [ ] **9. Verification & Evidence**
-  - [ ] Run `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`
-  - [ ] Capture after-screenshots at 1440px and 390px
-  - [ ] Update `IMPLEMENTATION_STATUS.md` with complete evidence
+- [x] **1. Design Tokens & Indian Locale Utilities**
+  - [x] Add `formatINR(amount)` and `formatIST(date)` helper functions in `src/utils/formatters.ts`
+  - [x] Standardize typography, tabular numerals (`tabular-nums font-mono`), and semantic color tokens in `tailwind.config.js` and `index.css`
+- [x] **2. Navigation & App Shell Overhaul**
+  - [x] Compact 7-item main navigation: Home, Orders, Inventory, Inward, Outward, Locations, Reports
+  - [x] Secondary "Administration & More" drawer/menu for Purchase Orders, Suppliers, Customers, Returns, Movements, Users, Audit, Settings
+  - [x] Top bar with facility switcher, contextual breadcrumbs, functional global search (Cmd+K), and user/demo role switcher
+  - [x] Fully responsive drawer and optimized mobile navigation header
+- [x] **3. Home — "Today at the warehouse"**
+  - [x] Top strip with <=4 compact operational metrics: Orders to Process, Inward Pending, Outward Pending, Low-Stock Items
+  - [x] Left column: Work Queue with prioritized floor tasks, priority badges, context, and immediate action buttons
+  - [x] Right column: Needs Attention with low-stock alerts, damaged units, pending receipts
+  - [x] One real-data operational figure: 7-day fulfillment pipeline & movement stage distribution with tooltips and empty states
+  - [x] Compact recent movement ledger table
+- [x] **4. Orders — Work Queue First**
+  - [x] Segmented tabs: All, New (Pending Allocation), To Pick, To Pack, Dispatched, Exceptions
+  - [x] Columns: Order ID, Channel/Source (neutral labels), Date/Time (IST), Item Lines, Fulfillment State, Priority, Next Action
+  - [x] Slide-out Order Detail drawer with line items, reservation status, customer details, and workflow action triggers
+  - [x] Search, status filtering, and one-click clear filters
+- [x] **5. Inventory — Fast Stock Lookup**
+  - [x] Prominent instant search for SKU, Product Name, Barcode, Bin
+  - [x] Clear columns: SKU, Product Name, Available, On Hand, Reserved, Bin/Location, Status
+  - [x] Right-aligned tabular numeric quantities, deficit alerts on low stock
+  - [x] Slide-out Product Detail drawer with Overview, Bin Allocations, Movement History, and Stock Composition Bar
+- [x] **6. Inward — Guided Receiving Wizard**
+  - [x] 5-step staged receiving wizard: 1. Inbound PO -> 2. SKU/Item Entry -> 3. Quantity Breakdown -> 4. Bin & Lot Assignment -> 5. Review & Confirm
+  - [x] Live summary panel updating dynamically from form state
+  - [x] Duplicate submission prevention and clear confirmation
+- [x] **7. Outward — Guided Picking, Packing & Dispatch**
+  - [x] Prominent source bin display for warehouse pickers
+  - [x] Pick progress indicator derived from real line counts
+  - [x] Short-pick discrepancy recording with reason codes
+  - [x] Seamless handover to packing & dispatch
+- [x] **8. Locations & Reports Refinement**
+  - [x] Locations: Clean Zone > Aisle > Rack > Bin hierarchy with occupancy bars
+  - [x] Reports: INR valuation formatting, low-stock deficit analysis, lot expiry schedule
+- [x] **9. Verification & Evidence**
+  - [x] Run `npm run typecheck`, `npm run lint`, `npm run test`, `npm run build`
+  - [x] Capture after-screenshots at 1440px and 390px
+  - [x] Update `IMPLEMENTATION_STATUS.md` with complete evidence
