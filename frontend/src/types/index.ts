@@ -360,6 +360,12 @@ export interface DashboardSummary {
     status: string;
     createdAt: string;
   }>;
+  orderStages?: Record<string, number>;
+  movementTrends7Days?: Array<{
+    date: string;
+    inboundUnits: number;
+    outboundUnits: number;
+  }>;
 }
 
 export interface ApiResponse<T = any> {
