@@ -44,12 +44,15 @@ export const App: React.FC = () => {
               <Route path="/" element={<AppLayout />}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="orders" element={<Navigate to="/sales-orders" replace />} />
+                <Route path="sales-orders" element={<SalesOrdersPage />} />
                 <Route path="inventory" element={<InventoryPage />} />
                 <Route path="locations" element={<LocationsPage />} />
                 <Route path="purchase-orders" element={<PurchaseOrdersPage />} />
+                <Route path="inward" element={<Navigate to="/receiving" replace />} />
                 <Route path="receiving" element={<ReceivingPage />} />
                 <Route path="put-away" element={<PutAwayPage />} />
-                <Route path="sales-orders" element={<SalesOrdersPage />} />
+                <Route path="outward" element={<Navigate to="/picking" replace />} />
                 <Route path="picking" element={<PickingPage />} />
                 <Route path="packing" element={<PackingPage />} />
                 <Route path="shipments" element={<ShipmentsPage />} />

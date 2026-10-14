@@ -22,10 +22,30 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileNav }) => {
   const location = useLocation();
 
   // Generate breadcrumb title
-  const path = location.pathname.replace('/', '');
-  const pageTitle = path
-    ? path.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-    : 'Dashboard';
+  const path = location.pathname.replace(/^\//, '').split('/')[0];
+  const titleMap: Record<string, string> = {
+    '': 'Home',
+    'dashboard': 'Home',
+    'sales-orders': 'Orders',
+    'orders': 'Orders',
+    'inventory': 'Inventory',
+    'receiving': 'Inward Receiving',
+    'inward': 'Inward Receiving',
+    'picking': 'Outward Picking',
+    'outward': 'Outward Picking',
+    'packing': 'Packing Station',
+    'shipments': 'Dispatches & Shipments',
+    'locations': 'Warehouse Locations',
+    'reports': 'Reports & Intelligence',
+    'purchase-orders': 'Purchase Orders',
+    'put-away': 'Put-Away Tasks',
+    'returns': 'Customer Returns',
+    'movements': 'Stock Movements Ledger',
+    'users': 'Users & Access',
+    'audit': 'Audit Trail',
+    'settings': 'Facility Settings',
+  };
+  const pageTitle = titleMap[path] || (path.charAt(0).toUpperCase() + path.slice(1));
 
   return (
     <>
