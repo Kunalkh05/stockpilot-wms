@@ -141,6 +141,72 @@ export class ReportService {
       })),
     ];
 
+    // 5. Order stage distribution for horizontal pipeline
+    const stagesRaw = await prisma.salesOrder.groupBy({
+      by: ['status'],
+      where: whereOrder,
+      _count: { id: true },
+    });
+    const orderStages: Record<string, number> = {
+      PENDING: 0,
+      ALLOCATED: 0,
+      PICKING: 0,
+      PACKED: 0,
+      SHIPPED: 0,
+      CANCELLED: 0,
+    };
+    for (const s of stagesRaw) {
+      orderStages[s.status] = s._count.id;
+    }
+
+    // 6. 7-Day Inbound vs Outbound movements for real operational trend
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const movements7Days = await prisma.stockMovement.findMany({
+      where: {
+        createdAt: { gte: sevenDaysAgo },
+        ...(warehouseId
+          ? {
+              OR: [
+                { sourceLocation: { warehouseId } },
+                { destinationLocation: { warehouseId } },
+              ],
+            }
+          : {}),
+      },
+      select: {
+        createdAt: true,
+        referenceType: true,
+        quantity: true,
+      },
+    });
+
+    const dayMap: Record<string, { inboundUnits: number; outboundUnits: number }> = {};
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(sevenDaysAgo);
+      d.setDate(d.getDate() + i);
+      const dateKey = d.toISOString().split('T')[0];
+      dayMap[dateKey] = { inboundUnits: 0, outboundUnits: 0 };
+    }
+
+    for (const m of movements7Days) {
+      const dateKey = m.createdAt.toISOString().split('T')[0];
+      if (!dayMap[dateKey]) dayMap[dateKey] = { inboundUnits: 0, outboundUnits: 0 };
+      if (m.referenceType === 'PURCHASE_RECEIPT' || m.referenceType === 'RETURN_RESTOCK') {
+        dayMap[dateKey].inboundUnits += m.quantity;
+      } else if (m.referenceType === 'ORDER_SHIP' || m.referenceType === 'ORDER_PICK') {
+        dayMap[dateKey].outboundUnits += m.quantity;
+      }
+    }
+
+    const movementTrends7Days = Object.entries(dayMap).map(([date, counts]) => ({
+      date,
+      inboundUnits: counts.inboundUnits,
+      outboundUnits: counts.outboundUnits,
+    }));
+
     return {
       kpi: {
         totalSellableUnits,
@@ -161,6 +227,8 @@ export class ReportService {
       })),
       recentMovements,
       priorityTasks,
+      orderStages,
+      movementTrends7Days,
     };
   }
 
