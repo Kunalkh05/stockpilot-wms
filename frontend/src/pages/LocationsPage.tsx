@@ -19,6 +19,7 @@ import { SearchInput } from '../components/common/SearchInput.js';
 import { Badge } from '../components/common/Badge.js';
 import { Modal } from '../components/common/Modal.js';
 import { toast } from 'sonner';
+import { formatNumberIN } from '../utils/formatters.js';
 
 export const LocationsPage: React.FC = () => {
   const { selectedWarehouseId, selectedWarehouse, warehouses, setSelectedWarehouseId } = useWarehouse();
