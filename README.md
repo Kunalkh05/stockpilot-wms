@@ -106,5 +106,33 @@ npm run build
 
 ---
 
+## Cloudflare Deployment Guide
+
+The repository includes pre-configured SPA client-side routing rules (`frontend/public/_redirects`) and HTTP security headers (`frontend/public/_headers`) tailored for **Cloudflare Pages**.
+
+### Deploying Frontend to Cloudflare Pages (Instant CI/CD)
+
+1. Log into your [Cloudflare Dashboard](https://dash.cloudflare.com/).
+2. In the sidebar, navigate to **Workers & Pages** > **Create application** > select the **Pages** tab.
+3. Click **Connect to Git** and select the GitHub repository:
+   `Kunalkh05/stockpilot-wms`
+4. Configure the build settings:
+   - **Framework preset**: `Vite`
+   - **Root directory**: `frontend`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+5. *(Optional)* Under **Environment variables**, set:
+   - `VITE_API_URL`: Your hosted backend API URL (defaults to `/api/v1` in local proxy mode)
+6. Click **Save and Deploy**. Cloudflare Pages will build and assign an edge-distributed URL (e.g. `https://stockpilot-wms.pages.dev`).
+
+### Deploying Backend & Database
+
+The backend is a Node.js + Express + Prisma application backed by PostgreSQL:
+- Host PostgreSQL on Cloudflare D1 / Supabase / Neon / AWS RDS.
+- Run database migrations (`npx prisma migrate deploy` or `prisma db push`) and seed (`tsx prisma/seed.ts`).
+- Set `DATABASE_URL`, `JWT_SECRET`, and `CORS_ORIGIN` in production environment variables.
+
+---
+
 ## License
 Proprietary & Confidential. Designed for StockPilot WMS Autonomous Systems.
