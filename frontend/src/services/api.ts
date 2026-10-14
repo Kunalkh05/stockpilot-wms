@@ -7,6 +7,18 @@ class ApiClient {
     return localStorage.getItem('stockpilot_token');
   }
 
+  private toQueryString(params?: Record<string, any>): string {
+    if (!params) return '';
+    const cleanParams: Record<string, string> = {};
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') {
+        cleanParams[k] = String(v);
+      }
+    });
+    const qs = new URLSearchParams(cleanParams).toString();
+    return qs ? `?${qs}` : '';
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();
     const headers: Record<string, string> = {
@@ -53,8 +65,7 @@ class ApiClient {
   }
 
   async listUsers(params?: Record<string, string | number>) {
-    const qs = params ? '?' + new URLSearchParams(params as any).toString() : '';
-    return this.request<any[]>(`/auth/users${qs}`);
+    return this.request<any[]>(`/auth/users${this.toQueryString(params as any)}`);
   }
 
   async createUser(data: any) {
@@ -81,16 +92,7 @@ class ApiClient {
   }
 
   async listLocations(warehouseId: string, params?: Record<string, any>) {
-    const cleanParams: Record<string, string> = {};
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        if (v !== undefined && v !== null && v !== '') {
-          cleanParams[k] = String(v);
-        }
-      });
-    }
-    const qs = Object.keys(cleanParams).length > 0 ? '?' + new URLSearchParams(cleanParams).toString() : '';
-    return this.request<any[]>(`/warehouses/${warehouseId}/locations${qs}`);
+    return this.request<any[]>(`/warehouses/${warehouseId}/locations${this.toQueryString(params)}`);
   }
 
   async createLocation(warehouseId: string, data: any) {
@@ -109,8 +111,7 @@ class ApiClient {
 
   // Products & Categories
   async listProducts(params?: Record<string, string | number>) {
-    const qs = params ? '?' + new URLSearchParams(params as any).toString() : '';
-    return this.request<any[]>(`/products${qs}`);
+    return this.request<any[]>(`/products${this.toQueryString(params as any)}`);
   }
 
   async getProduct(id: string) {
@@ -143,8 +144,7 @@ class ApiClient {
 
   // Inventory & Movements
   async listBalances(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/inventory/balances${qs}`);
+    return this.request<any[]>(`/inventory/balances${this.toQueryString(params)}`);
   }
 
   async getProductStock(productId: string, warehouseId?: string) {
@@ -215,8 +215,7 @@ class ApiClient {
   }
 
   async listPurchaseOrders(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/inbound/purchase-orders${qs}`);
+    return this.request<any[]>(`/inbound/purchase-orders${this.toQueryString(params)}`);
   }
 
   async createPurchaseOrder(data: any) {
@@ -234,8 +233,7 @@ class ApiClient {
   }
 
   async listPutAwayTasks(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/inbound/put-away-tasks${qs}`);
+    return this.request<any[]>(`/inbound/put-away-tasks${this.toQueryString(params)}`);
   }
 
   async completePutAway(taskId: string, confirmedLocationId: string) {
@@ -268,13 +266,11 @@ class ApiClient {
   }
 
   async listReservations(params?: { warehouseId?: string; status?: string }) {
-    const qs = params ? '?' + new URLSearchParams(params as any).toString() : '';
-    return this.request<any[]>(`/outbound/reservations${qs}`);
+    return this.request<any[]>(`/outbound/reservations${this.toQueryString(params as any)}`);
   }
 
   async listSalesOrders(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/outbound/orders${qs}`);
+    return this.request<any[]>(`/outbound/orders${this.toQueryString(params)}`);
   }
 
   async createSalesOrder(data: any) {
@@ -291,8 +287,7 @@ class ApiClient {
   }
 
   async listPickTasks(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/outbound/pick-tasks${qs}`);
+    return this.request<any[]>(`/outbound/pick-tasks${this.toQueryString(params)}`);
   }
 
   async confirmPickItem(taskId: string, itemId: string, data: { pickedQty: number; discrepancyReason?: string }) {
@@ -325,8 +320,7 @@ class ApiClient {
 
   // Returns
   async listReturns(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/returns${qs}`);
+    return this.request<any[]>(`/returns${this.toQueryString(params)}`);
   }
 
   async createReturn(data: any) {
@@ -371,8 +365,7 @@ class ApiClient {
 
   // Audit
   async listAuditLogs(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/audit/logs${qs}`);
+    return this.request<any[]>(`/audit/logs${this.toQueryString(params)}`);
   }
 }
 
