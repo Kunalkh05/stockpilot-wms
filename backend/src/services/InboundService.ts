@@ -10,7 +10,7 @@ export class InboundService {
    */
   static async listPurchaseOrders(query: {
     warehouseId?: string;
-    status?: POStatus;
+    status?: POStatus | POStatus[] | string;
     supplierId?: string;
     search?: string;
     page?: number;
@@ -22,7 +22,15 @@ export class InboundService {
 
     const where: Prisma.PurchaseOrderWhereInput = {};
     if (query.warehouseId) where.warehouseId = query.warehouseId;
-    if (query.status) where.status = query.status;
+    if (query.status) {
+      if (typeof query.status === 'string' && query.status.includes(',')) {
+        where.status = { in: query.status.split(',').map((s) => s.trim()) as POStatus[] };
+      } else if (Array.isArray(query.status)) {
+        where.status = { in: query.status as POStatus[] };
+      } else {
+        where.status = query.status as POStatus;
+      }
+    }
     if (query.supplierId) where.supplierId = query.supplierId;
     if (query.search) {
       where.OR = [
