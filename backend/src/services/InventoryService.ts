@@ -426,7 +426,9 @@ export class InventoryService {
 
     const where: Prisma.StockMovementWhereInput = {};
     if (query.productId) where.productId = query.productId;
-    if (query.referenceType) where.referenceType = query.referenceType;
+    if (query.referenceType && Object.values(MovementType).includes(query.referenceType as any)) {
+      where.referenceType = query.referenceType;
+    }
     if (query.referenceId) where.referenceId = { contains: query.referenceId, mode: 'insensitive' };
     if (query.startDate || query.endDate) {
       where.createdAt = {};
