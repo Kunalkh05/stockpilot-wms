@@ -181,8 +181,7 @@ class ApiClient {
   }
 
   async listMovements(params?: Record<string, any>) {
-    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-    return this.request<any[]>(`/inventory/movements${qs}`);
+    return this.request<any[]>(`/inventory/movements${this.toQueryString(params)}`);
   }
 
   getExportCsvUrl(warehouseId?: string) {
