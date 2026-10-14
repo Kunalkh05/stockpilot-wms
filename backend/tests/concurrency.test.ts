@@ -38,10 +38,19 @@ describe('Concurrency Control & Overselling Prevention', () => {
       data: { onHand: 0, reserved: 0, damaged: 0 },
     });
 
-    await prisma.inventoryBalance.updateMany({
+    const existing = await prisma.inventoryBalance.findFirst({
       where: { warehouseId, locationId, productId },
-      data: { onHand: 10, reserved: 0, damaged: 0 },
     });
+    if (existing) {
+      await prisma.inventoryBalance.update({
+        where: { id: existing.id },
+        data: { onHand: 10, reserved: 0, damaged: 0 },
+      });
+    } else {
+      await prisma.inventoryBalance.create({
+        data: { warehouseId, locationId, productId, onHand: 10, reserved: 0, damaged: 0 },
+      });
+    }
 
     // 2. Create Order A (demanding 8 units) and Order B (demanding 8 units)
     // Combined demand = 16 units, but only 10 exist!
