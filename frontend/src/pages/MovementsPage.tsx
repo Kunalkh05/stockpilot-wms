@@ -177,8 +177,8 @@ export const MovementsPage: React.FC = () => {
             ) : (
               movements.map((m) => (
                 <tr key={m.id} className="hover:bg-surface-50/70 transition-colors">
-                  <td className="px-4 py-2.5 font-mono text-surface-500 text-[11px] whitespace-nowrap">
-                    {new Date(m.createdAt).toLocaleString()}
+                  <td className="px-4 py-2.5 font-mono text-surface-500 text-[11px] whitespace-nowrap tabular-nums">
+                    {formatIST(m.createdAt)}
                   </td>
                   <td className="px-4 py-2.5">
                     <Badge
@@ -216,13 +216,13 @@ export const MovementsPage: React.FC = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5 text-right font-mono font-bold text-surface-900">
-                    {m.quantity} {m.product.uom}
+                  <td className="px-4 py-2.5 text-right font-mono font-bold text-surface-900 tabular-nums">
+                    {formatNumberIN(m.quantity)} {m.product.uom}
                   </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-[11px]">
-                    <span className="text-surface-400">{m.balanceBefore}</span>
+                  <td className="px-4 py-2.5 text-right font-mono text-[11px] tabular-nums">
+                    <span className="text-surface-400">{formatNumberIN(m.balanceBefore)}</span>
                     <span className="text-surface-400 mx-1">&rarr;</span>
-                    <span className="font-semibold text-surface-800">{m.balanceAfter}</span>
+                    <span className="font-semibold text-surface-800">{formatNumberIN(m.balanceAfter)}</span>
                   </td>
                   <td className="px-4 py-2.5 text-surface-600 text-[11px]">
                     <div>{m.reason || 'Standard Warehouse Transaction'}</div>
