@@ -519,7 +519,7 @@ export const PurchaseOrdersPage: React.FC = () => {
                     <option value="">Select SKU...</option>
                     {products.map((p) => (
                       <option key={p.id} value={p.id}>
-                        {p.sku} — {p.name} (${p.unitCost})
+                        {p.sku} — {p.name} ({formatINR(p.unitCost)})
                       </option>
                     ))}
                   </select>
@@ -628,7 +628,7 @@ export const PurchaseOrdersPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="+1 (555) 019-2834"
+                placeholder="+91 98200 12345"
                 value={newSupplier.phone}
                 onChange={(e) => setNewSupplier({ ...newSupplier, phone: e.target.value })}
                 className="w-full h-8 px-2 text-xs border border-surface-300 rounded"
@@ -643,7 +643,7 @@ export const PurchaseOrdersPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Chicago"
+                placeholder="e.g. Bhiwandi, Thane, Bengaluru"
                 value={newSupplier.city}
                 onChange={(e) => setNewSupplier({ ...newSupplier, city: e.target.value })}
                 className="w-full h-8 px-2 text-xs border border-surface-300 rounded"
@@ -655,7 +655,7 @@ export const PurchaseOrdersPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="e.g. 100 Industrial Pkwy"
+                placeholder="e.g. Plot 42, Logistics Park, NH 48"
                 value={newSupplier.address}
                 onChange={(e) => setNewSupplier({ ...newSupplier, address: e.target.value })}
                 className="w-full h-8 px-2 text-xs border border-surface-300 rounded"
