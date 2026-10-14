@@ -67,32 +67,44 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileNav }) => {
         </div>
 
         {/* Center: Global Search Bar trigger */}
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
+        <div className="flex-1 max-w-md mx-4 hidden lg:block min-w-0">
           <button
+            type="button"
             onClick={() => setIsSearchOpen(true)}
-            className="w-full h-8 px-3 text-xs bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-md text-surface-400 flex items-center justify-between transition-colors cursor-pointer"
+            className="w-full h-8 px-3 text-xs bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-md text-surface-400 flex items-center justify-between transition-colors cursor-pointer overflow-hidden whitespace-nowrap"
           >
-            <div className="flex items-center gap-2">
-              <Search className="w-3.5 h-3.5" />
-              <span>Search inventory, orders, bins...</span>
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+              <Search className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">Search inventory, orders, bins...</span>
             </div>
-            <kbd className="px-1.5 py-0.5 text-[10px] bg-white border border-surface-300 rounded text-surface-500 font-mono">
+            <kbd className="px-1.5 py-0.5 text-[10px] bg-white border border-surface-300 rounded text-surface-500 font-mono shrink-0 ml-2">
               ⌘K
             </kbd>
           </button>
         </div>
 
         {/* Right: Warehouse Facility Switcher & Notifications */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Quick Search icon button for screens without the full search bar */}
+          <button
+            type="button"
+            onClick={() => setIsSearchOpen(true)}
+            className="lg:hidden p-1.5 rounded-md text-surface-600 hover:bg-surface-100 transition-colors"
+            title="Search"
+          >
+            <Search className="w-4 h-4" />
+          </button>
+
           {/* Facility Switcher Dropdown */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowWarehouseMenu(!showWarehouseMenu)}
-              className="flex items-center gap-2 px-2.5 py-1.5 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-md text-xs font-medium text-surface-700 transition-colors"
+              className="flex items-center gap-2 px-2.5 py-1.5 bg-surface-50 hover:bg-surface-100 border border-surface-200 rounded-md text-xs font-medium text-surface-700 transition-colors max-w-[200px] sm:max-w-xs"
             >
-              <WarehouseIcon className="w-3.5 h-3.5 text-brand-600" />
-              <span>{selectedWarehouse ? selectedWarehouse.name : 'All Facilities'}</span>
-              <ChevronDown className="w-3.5 h-3.5 text-surface-400" />
+              <WarehouseIcon className="w-3.5 h-3.5 text-brand-600 shrink-0" />
+              <span className="truncate">{selectedWarehouse ? selectedWarehouse.name : 'All Facilities'}</span>
+              <ChevronDown className="w-3.5 h-3.5 text-surface-400 shrink-0" />
             </button>
 
             {showWarehouseMenu && (
