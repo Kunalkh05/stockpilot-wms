@@ -64,7 +64,7 @@ export const ReceivingPage: React.FC = () => {
       const [pos, locs] = await Promise.all([
         api.listPurchaseOrders({
           warehouseId: selectedWarehouseId,
-          status: 'ORDERED',
+          status: 'ORDERED,PARTIALLY_RECEIVED',
         }),
         selectedWarehouseId ? api.listLocations(selectedWarehouseId, { type: 'RECEIVING' }) : [],
       ]);
