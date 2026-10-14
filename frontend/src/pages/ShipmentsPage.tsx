@@ -196,10 +196,8 @@ export const ShipmentsPage: React.FC = () => {
                         icon={Truck}
                         title="No Cartons Awaiting Dispatch"
                         description="All packed cartons have been dispatched to logistics carriers. Check the packing station for upcoming cartons."
-                        action={{
-                          label: 'Go to Packing Station',
-                          onClick: () => navigate('/packing'),
-                        }}
+                        actionLabel="Go to Packing Station"
+                        onAction={() => navigate('/packing')}
                       />
                     </td>
                   </tr>

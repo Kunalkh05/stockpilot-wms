@@ -171,10 +171,8 @@ export const PackingPage: React.FC = () => {
                       icon={PackageCheck}
                       title="No Orders Awaiting Packing"
                       description="All floor-picked items have been packed into shipping cartons. Check floor picking queue for new tasks."
-                      action={{
-                        label: 'Go to Floor Picking Queue',
-                        onClick: () => navigate('/picking'),
-                      }}
+                      actionLabel="Go to Floor Picking Queue"
+                      onAction={() => navigate('/picking')}
                     />
                   </td>
                 </tr>
