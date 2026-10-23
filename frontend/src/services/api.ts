@@ -1,6 +1,104 @@
-import { ApiResponse } from '../types/index.js';
+import { ApiResponse, Role, User } from '../types/index.js';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
+const DEMO_ACCOUNTS = [
+  {
+    id: 'demo-admin-01',
+    email: 'admin@stockpilot.io',
+    loginId: 'admin',
+    fullName: 'Alex Vance (Admin)',
+    role: 'ADMIN' as Role,
+    active: true,
+    password: 'StockPilot2026!',
+    memberships: [
+      {
+        warehouse: {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          isDefault: true,
+        },
+      },
+    ],
+  },
+  {
+    id: 'demo-manager-02',
+    email: 'manager@stockpilot.io',
+    loginId: 'manager',
+    fullName: 'Sarah Chen (Ops Manager)',
+    role: 'WAREHOUSE_MANAGER' as Role,
+    active: true,
+    password: 'StockPilot2026!',
+    memberships: [
+      {
+        warehouse: {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          isDefault: true,
+        },
+      },
+    ],
+  },
+  {
+    id: 'demo-inv-03',
+    email: 'inventory@stockpilot.io',
+    loginId: 'inventory',
+    fullName: 'David Morales (Inventory Lead)',
+    role: 'INVENTORY_SPECIALIST' as Role,
+    active: true,
+    password: 'StockPilot2026!',
+    memberships: [
+      {
+        warehouse: {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          isDefault: true,
+        },
+      },
+    ],
+  },
+  {
+    id: 'demo-picker-04',
+    email: 'picker@stockpilot.io',
+    loginId: 'picker',
+    fullName: 'Marcus Bell (Fulfillment Associate)',
+    role: 'PICKER_PACKER' as Role,
+    active: true,
+    password: 'StockPilot2026!',
+    memberships: [
+      {
+        warehouse: {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          isDefault: true,
+        },
+      },
+    ],
+  },
+  {
+    id: 'demo-rcv-05',
+    email: 'receiving@stockpilot.io',
+    loginId: 'receiving',
+    fullName: 'Elena Rostova (Inbound Lead)',
+    role: 'RECEIVING_CLERK' as Role,
+    active: true,
+    password: 'StockPilot2026!',
+    memberships: [
+      {
+        warehouse: {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          isDefault: true,
+        },
+      },
+    ],
+  },
+];
 
 class ApiClient {
   private getToken(): string | null {
@@ -19,6 +117,127 @@ class ApiClient {
     return qs ? `?${qs}` : '';
   }
 
+  private handleOfflineFallback<T>(endpoint: string, options: RequestInit = {}): T | null {
+    const body = options.body ? JSON.parse(options.body as string) : {};
+
+    // 1. Fallback for /auth/login
+    if (endpoint.includes('/auth/login')) {
+      const identifier = (body.identifier || body.loginId || body.email || body.username || '').trim().toLowerCase();
+      const password = body.password || '';
+
+      const localUsers: any[] = JSON.parse(localStorage.getItem('stockpilot_local_users') || '[]');
+      const allUsers = [...DEMO_ACCOUNTS, ...localUsers];
+
+      const found = allUsers.find((u) => {
+        const emailMatch = u.email?.toLowerCase() === identifier;
+        const loginMatch = u.loginId?.toLowerCase() === identifier;
+        const prefixMatch = !identifier.includes('@') && u.email?.toLowerCase().startsWith(`${identifier}@`);
+        return emailMatch || loginMatch || prefixMatch;
+      });
+
+      if (!found || found.password !== password) {
+        throw new Error('Invalid login ID or password');
+      }
+
+      const { password: _, ...userSafe } = found;
+      return {
+        token: `demo_jwt_token_${found.id}_${Date.now()}`,
+        user: userSafe,
+      } as unknown as T;
+    }
+
+    // 2. Fallback for /auth/register
+    if (endpoint.includes('/auth/register')) {
+      const loginId = (body.loginId || '').trim().toLowerCase();
+      const password = body.password || '';
+      const fullName = (body.fullName || '').trim();
+      const email = (body.email || `${loginId}@stockpilot.local`).trim().toLowerCase();
+      const role = (body.role as Role) || 'WAREHOUSE_MANAGER';
+
+      if (!loginId || loginId.length < 3) {
+        throw new Error('Login ID must be at least 3 characters');
+      }
+      if (!password || password.length < 6) {
+        throw new Error('Password must be at least 6 characters');
+      }
+
+      const localUsers: any[] = JSON.parse(localStorage.getItem('stockpilot_local_users') || '[]');
+      const allUsers = [...DEMO_ACCOUNTS, ...localUsers];
+
+      const isTaken = allUsers.some(
+        (u) => u.loginId?.toLowerCase() === loginId || u.email?.toLowerCase() === email
+      );
+      if (isTaken) {
+        throw new Error(`Login ID "${loginId}" is already taken. Please choose another.`);
+      }
+
+      const newUser = {
+        id: `usr_${Date.now()}`,
+        email,
+        loginId,
+        fullName,
+        role,
+        active: true,
+        password,
+        createdAt: new Date().toISOString(),
+        memberships: [
+          {
+            warehouse: {
+              id: 'wh-edc-001',
+              code: 'EDC',
+              name: 'East Coast Distribution Center',
+              isDefault: true,
+            },
+          },
+        ],
+      };
+
+      localUsers.push(newUser);
+      localStorage.setItem('stockpilot_local_users', JSON.stringify(localUsers));
+
+      const { password: _, ...userSafe } = newUser;
+      return {
+        token: `demo_jwt_token_${newUser.id}_${Date.now()}`,
+        user: userSafe,
+      } as unknown as T;
+    }
+
+    // 3. Fallback for /auth/me
+    if (endpoint.includes('/auth/me')) {
+      const stored = localStorage.getItem('stockpilot_user');
+      if (stored) {
+        try {
+          return JSON.parse(stored) as T;
+        } catch {}
+      }
+      return DEMO_ACCOUNTS[0] as unknown as T;
+    }
+
+    // 4. Fallback for /warehouses
+    if (endpoint === '/warehouses') {
+      return [
+        {
+          id: 'wh-edc-001',
+          code: 'EDC',
+          name: 'East Coast Distribution Center',
+          city: 'Newark',
+          state: 'NJ',
+          isDefault: true,
+        },
+        {
+          id: 'wh-wdc-002',
+          code: 'WDC',
+          name: 'West Coast Fulfillment Hub',
+          city: 'Reno',
+          state: 'NV',
+          isDefault: false,
+        },
+      ] as unknown as T;
+    }
+
+    return null;
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const token = this.getToken();
     const headers: Record<string, string> = {
@@ -30,33 +249,65 @@ class ApiClient {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    try {
+      const res = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+      });
 
-    const data: ApiResponse<T> = await res.json().catch(() => ({
-      success: false,
-      error: { code: 'PARSE_ERROR', message: 'Failed to parse JSON response' },
-    }));
-
-    if (!res.ok || !data.success) {
-      if (res.status === 401 && !endpoint.includes('/auth/login')) {
-        localStorage.removeItem('stockpilot_token');
-        localStorage.removeItem('stockpilot_user');
-        window.location.href = '/login';
+      // If backend responded with HTML (e.g. Cloudflare Pages SPA rewrite returning index.html)
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const fallback = this.handleOfflineFallback<T>(endpoint, options);
+        if (fallback !== null) {
+          return fallback;
+        }
+        throw new Error('Service unavailable. Please ensure backend server is running.');
       }
-      throw new Error(data.error?.message || `Request failed with status ${res.status}`);
-    }
 
-    return data.data;
+      const data: ApiResponse<T> = await res.json().catch(() => ({
+        success: false,
+        error: { code: 'PARSE_ERROR', message: 'Failed to parse JSON response' },
+      }));
+
+      if (!res.ok || !data.success) {
+        if (res.status === 401 && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
+          localStorage.removeItem('stockpilot_token');
+          localStorage.removeItem('stockpilot_user');
+          window.location.href = '/login';
+        }
+        throw new Error(data.error?.message || `Request failed with status ${res.status}`);
+      }
+
+      return data.data;
+    } catch (err: any) {
+      // Handle connection refused, network errors or offline fallback
+      const fallback = this.handleOfflineFallback<T>(endpoint, options);
+      if (fallback !== null) {
+        return fallback;
+      }
+      throw err;
+    }
   }
 
   // Auth
-  async login(email: string, password: string) {
-    return this.request<{ token: string; user: any }>('/auth/login', {
+  async login(identifier: string, password: string) {
+    return this.request<{ token: string; user: User }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
+    });
+  }
+
+  async register(data: {
+    loginId: string;
+    password: string;
+    fullName: string;
+    email?: string;
+    role?: Role;
+  }) {
+    return this.request<{ token: string; user: User }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 

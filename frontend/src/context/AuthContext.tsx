@@ -6,7 +6,14 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
+  register: (data: {
+    loginId: string;
+    password: string;
+    fullName: string;
+    email?: string;
+    role?: Role;
+  }) => Promise<void>;
   logout: () => void;
   switchDemoRole: (role: Role) => Promise<void>;
   hasRole: (...roles: Role[]) => boolean;
@@ -41,8 +48,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser();
   }, [token]);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.login(email, password);
+  const login = async (identifier: string, password: string) => {
+    const res = await api.login(identifier, password);
+    localStorage.setItem('stockpilot_token', res.token);
+    localStorage.setItem('stockpilot_user', JSON.stringify(res.user));
+    setToken(res.token);
+    setUser(res.user);
+  };
+
+  const register = async (data: {
+    loginId: string;
+    password: string;
+    fullName: string;
+    email?: string;
+    role?: Role;
+  }) => {
+    const res = await api.register(data);
     localStorage.setItem('stockpilot_token', res.token);
     localStorage.setItem('stockpilot_user', JSON.stringify(res.user));
     setToken(res.token);
@@ -80,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         login,
+        register,
         logout,
         switchDemoRole,
         hasRole,

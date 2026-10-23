@@ -109,6 +109,7 @@ enum ReturnDisposition {
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
+  loginId      String?  @unique @map("login_id")
   passwordHash String   @map("password_hash")
   fullName     String   @map("full_name")
   role         Role     @default(WAREHOUSE_MANAGER)

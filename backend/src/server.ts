@@ -83,6 +83,7 @@ const swaggerDocument = {
   paths: {
     '/health': { get: { summary: 'System Health Check' } },
     '/auth/login': { post: { summary: 'User Authentication & JWT issuance' } },
+    '/auth/register': { post: { summary: 'User Registration with custom login ID and password' } },
     '/warehouses': { get: { summary: 'List operational facilities' }, post: { summary: 'Register new facility' } },
     '/warehouses/{id}/locations': {
       get: { summary: 'List and filter warehouse storage locations' },

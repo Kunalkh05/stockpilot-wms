@@ -42,6 +42,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       email: 'admin@stockpilot.io',
+      loginId: 'admin',
       fullName: 'Alex Vance (Admin)',
       passwordHash,
       role: Role.ADMIN,
@@ -51,6 +52,7 @@ async function main() {
   const manager = await prisma.user.create({
     data: {
       email: 'manager@stockpilot.io',
+      loginId: 'manager',
       fullName: 'Sarah Chen (Ops Manager)',
       passwordHash,
       role: Role.WAREHOUSE_MANAGER,
@@ -60,6 +62,7 @@ async function main() {
   const specialist = await prisma.user.create({
     data: {
       email: 'inventory@stockpilot.io',
+      loginId: 'inventory',
       fullName: 'David Morales (Inventory Lead)',
       passwordHash,
       role: Role.INVENTORY_SPECIALIST,
@@ -69,6 +72,7 @@ async function main() {
   const picker = await prisma.user.create({
     data: {
       email: 'picker@stockpilot.io',
+      loginId: 'picker',
       fullName: 'Marcus Bell (Fulfillment Associate)',
       passwordHash,
       role: Role.PICKER_PACKER,
@@ -78,6 +82,7 @@ async function main() {
   const clerk = await prisma.user.create({
     data: {
       email: 'receiving@stockpilot.io',
+      loginId: 'receiving',
       fullName: 'Elena Rostova (Inbound Lead)',
       passwordHash,
       role: Role.RECEIVING_CLERK,

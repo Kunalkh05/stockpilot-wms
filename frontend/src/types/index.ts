@@ -53,6 +53,7 @@ export type MovementType =
 export interface User {
   id: string;
   email: string;
+  loginId?: string;
   fullName: string;
   role: Role;
   active: boolean;

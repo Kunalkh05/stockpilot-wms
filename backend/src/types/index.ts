@@ -4,6 +4,7 @@ import { Role } from '@prisma/client';
 export interface TokenPayload {
   userId: string;
   email: string;
+  loginId?: string | null;
   role: Role;
   fullName: string;
 }

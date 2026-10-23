@@ -45,6 +45,56 @@ describe('StockPilot WMS REST API Integration Tests', () => {
     expect(res.body.success).toBe(false);
   });
 
+  it('POST /api/v1/auth/login supports login with username / loginId alias without domain', async () => {
+    const res = await request(app)
+      .post('/api/v1/auth/login')
+      .send({ identifier: 'admin', password: 'StockPilot2026!' });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.token).toBeDefined();
+    expect(res.body.data.user.email).toBe('admin@stockpilot.io');
+  });
+
+  it('POST /api/v1/auth/register creates a user with custom loginId and password', async () => {
+    const uniqueId = `testuser_${Date.now()}`;
+    const res = await request(app)
+      .post('/api/v1/auth/register')
+      .send({
+        loginId: uniqueId,
+        fullName: 'Test Operator',
+        password: 'SecurePassword123!',
+        email: `${uniqueId}@example.com`,
+      });
+    expect(res.status).toBe(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.token).toBeDefined();
+    expect(res.body.data.user.loginId).toBe(uniqueId);
+
+    // Verify login with newly created loginId
+    const loginRes = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        loginId: uniqueId,
+        password: 'SecurePassword123!',
+      });
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.success).toBe(true);
+    expect(loginRes.body.data.user.loginId).toBe(uniqueId);
+  });
+
+  it('POST /api/v1/auth/register rejects duplicate loginId with 409', async () => {
+    const res = await request(app)
+      .post('/api/v1/auth/register')
+      .send({
+        loginId: 'admin',
+        fullName: 'Duplicate Admin',
+        password: 'SecurePassword123!',
+      });
+    expect(res.status).toBe(409);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('USER_EXISTS');
+  });
+
   it('GET /api/v1/auth/me returns current user identity with valid token', async () => {
     const res = await request(app)
       .get('/api/v1/auth/me')
